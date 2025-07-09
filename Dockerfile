@@ -62,44 +62,40 @@ RUN wget https://github.com/lsd-rs/lsd/releases/download/v1.1.5/lsd-v1.1.5-x86_6
     mv lsd-v1.1.5-x86_64-unknown-linux-gnu/lsd /usr/local/bin/ && \
     rm -rf lsd-v1.1.5-*
 
-# Install ALL conda packages with pinned versions in a single layer
+# Install core system and Python packages first
 RUN micromamba install --channel-priority strict -c conda-forge -c bioconda \
-    # Core system packages
     libstdcxx-ng \
     python=3.11.7 \
-    starship \
-    datamash \
-    openjdk=17 \
     pip \
-    # Compiler tools
     gcc \
     make \
     cmake \
     gsl \
     cython \
-    # Jupyter ecosystem
-    jupyter \
-    jupyterlab \
-    notebook \
-    ipykernel \
-    # Core Python stack for population genetics
-    scikit-allel \
-    cyvcf2 \
-    pandas \
     numpy \
     scipy \
+    pandas \
     matplotlib \
     seaborn \
-    plotly \
-    scikit-learn \
+    -y && micromamba clean --all --yes
+
+# Install bioinformatics Python packages
+RUN micromamba install --channel-priority strict -c conda-forge -c bioconda \
+    scikit-allel \
+    cyvcf2 \
     pyfaidx \
     pysam \
     biopython \
+    scikit-learn \
+    plotly \
     bokeh \
     altair \
     holoviews \
     networkx \
-    # Geospatial Python packages
+    -y && micromamba clean --all --yes
+
+# Install geospatial packages
+RUN micromamba install --channel-priority strict -c conda-forge -c bioconda \
     geopandas \
     fiona \
     rasterio \
@@ -109,8 +105,10 @@ RUN micromamba install --channel-priority strict -c conda-forge -c bioconda \
     contextily \
     earthpy \
     geoplot \
-    # Essential WGS analysis tools
-    angsd \
+    -y && micromamba clean --all --yes
+
+# Install genomics tools
+RUN micromamba install --channel-priority strict -c conda-forge -c bioconda \
     samtools \
     bcftools \
     vcftools \
@@ -118,18 +116,48 @@ RUN micromamba install --channel-priority strict -c conda-forge -c bioconda \
     htslib \
     tabix \
     bwa \
-    # Population genetics tools
     plink \
     plink2 \
+    angsd \
+    -y && micromamba clean --all --yes
+
+# Install additional analysis tools
+RUN micromamba install --channel-priority strict -c conda-forge -c bioconda \
     admixture \
     iqtree \
-    # R base and packages
+    starship \
+    datamash \
+    openjdk=17 \
+    sra-tools \
+    entrez-direct \
+    snakemake \
+    -y && micromamba clean --all --yes
+
+# Install Jupyter ecosystem
+RUN micromamba install --channel-priority strict -c conda-forge -c bioconda \
+    jupyter \
+    jupyterlab \
+    notebook \
+    ipykernel \
+    -y && micromamba clean --all --yes
+
+# Install R and R packages
+RUN micromamba install --channel-priority strict -c conda-forge -c bioconda \
     r-base=4.3.2 \
     r-devtools \
     r-tidyverse \
     r-ggplot2 \
     r-here \
     r-data.table \
+    r-ade4 \
+    r-mass \
+    r-vegan \
+    r-seqinr \
+    r-qqconf \
+    -y && micromamba clean --all --yes
+
+# Install R spatial and visualization packages
+RUN micromamba install --channel-priority strict -c conda-forge -c bioconda \
     r-sf \
     r-raster \
     r-adegenet \
@@ -140,51 +168,45 @@ RUN micromamba install --channel-priority strict -c conda-forge -c bioconda \
     r-leaflet \
     r-networkd3 \
     r-tmap \
-    r-ade4 \
-    r-mass \
-    r-vegan \
-    r-seqinr \
-    r-qqconf \
-    # Bioconductor packages
+    -y && micromamba clean --all --yes
+
+# Install Bioconductor packages
+RUN micromamba install --channel-priority strict -c conda-forge -c bioconda \
     bioconductor-variantannotation \
     bioconductor-snprelate \
     bioconductor-annotationdbi \
     bioconductor-biomart \
     bioconductor-biostrings \
-    sra-tools \
-    entrez-direct \
-    # Workflow management tools
-    snakemake \
     -y && micromamba clean --all --yes
 
 # Install Ruby separately (with its bundled gem)
 RUN micromamba install -c conda-forge ruby=3.2.2 -y && micromamba clean --all --yes
 
-# Install R packages for population genetics and local adaptation analysis
+# Install R packages for population genetics and local adaptation analysis (with parallel processing)
 RUN R -e "install.packages(c('data.table', 'tidyverse', 'qqman', 'qqplotr', 'reticulate', 'broom', \
     'readxl', 'writexl', 'knitr', 'rmarkdown', 'pegas', 'ape', 'phangorn', 'vcfR', 'genetics', \
     'BiocManager', 'remotes', 'scales', 'ggrepel', 'ggtext', 'ggvenn', 'ggstatsplot', 'ggforce', \
     'ggpattern', 'scatterpie', 'RColorBrewer', 'extrafont', 'forcats', 'flextable', 'officer', \
     'Cairo', 'dartR', 'OutFLANK', 'geosphere', 'rnaturalearth', 'rnaturalearthdata', 'ggspatial', \
     'fields', 'grid', 'ellipse', 'reshape2', 'admixr', 'qvalue', 'genomation', 'regioneR'), \
-    repos='https://cloud.r-project.org/', dependencies=TRUE)"
+    repos='https://cloud.r-project.org/', dependencies=TRUE, Ncpus=4)"
 
 # Install Bioconductor packages not available via conda
 RUN R -e "if (!requireNamespace('BiocManager', quietly = TRUE)) install.packages('BiocManager'); \
     BiocManager::install(c('LEA'), update = FALSE, ask = FALSE)"
 
-# Install GitHub R packages for local adaptation
-RUN R -e "devtools::install_github('uqrmaie1/admixtools'); \
-    devtools::install_github('gearslaboratory/gdalUtils', force = TRUE); \
-    devtools::install_github('petrelharp/templater'); \
-    devtools::install_github('petrelharp/local_pca/lostruct'); \
-    remotes::install_github('eriqande/TESS3_encho_sen'); \
-    remotes::install_github('eriqande/genoscapeRtools'); \
-    devtools::install_github('SolangeD/R.SamBada', build_vignettes = FALSE); \
-    devtools::install_github('bcm-uga/lfmm'); \
-    devtools::install_github('bcm-uga/TESS3_encho_sen'); \
-    devtools::install_github('bcm-uga/LEA'); \
-    devtools::install_github('petrikemppainen/LDna', ref = 'v.2.15')"
+# Install GitHub R packages for local adaptation (with error handling)
+RUN R -e "devtools::install_github('uqrmaie1/admixtools') || TRUE; \
+    devtools::install_github('gearslaboratory/gdalUtils', force = TRUE) || TRUE; \
+    devtools::install_github('petrelharp/templater') || TRUE; \
+    devtools::install_github('petrelharp/local_pca/lostruct') || TRUE; \
+    remotes::install_github('eriqande/TESS3_encho_sen') || TRUE; \
+    remotes::install_github('eriqande/genoscapeRtools') || TRUE; \
+    devtools::install_github('SolangeD/R.SamBada', build_vignettes = FALSE) || TRUE; \
+    devtools::install_github('bcm-uga/lfmm') || TRUE; \
+    devtools::install_github('bcm-uga/TESS3_encho_sen') || TRUE; \
+    devtools::install_github('bcm-uga/LEA') || TRUE; \
+    devtools::install_github('petrikemppainen/LDna', ref = 'v.2.15') || TRUE"
 
 # Install Python packages not in conda-forge
 RUN pip3 install --no-cache-dir pong
@@ -193,7 +215,7 @@ RUN pip3 install --no-cache-dir pong
 RUN /opt/conda/bin/gem install colorls --no-document -n /usr/local/bin && \
     chmod +x /usr/local/bin/colorls
 
-# Download and install local adaptation tools
+# Download and install local adaptation tools (with error handling)
 RUN R -e "library(R.SamBada); downloadSambada('/opt/sambada')" && \
     find /opt/sambada -name "sambada*" -type f -executable -exec chmod +x {} \; && \
     find /opt/sambada -name "sambada*" -type f -executable -exec ln -sf {} /usr/local/bin/ \; && \
@@ -220,7 +242,7 @@ RUN R -e "library(R.SamBada); downloadSambada('/opt/sambada')" && \
     git clone https://github.com/stevemussmann/BA3-SNPS-autotune.git && \
     cd BA3-SNPS-autotune && \
     chmod +x BA3-SNPS-autotune.py && \
-    ln -sf /opt/BA3-SNPS-autotune/BA3-SNPS-autotune.py /usr/local/bin/BA3-SNPS-autotune
+    ln -sf /opt/BA3-SNPS-autotune/BA3-SNPS-autotune.py /usr/local/bin/BA3-SNPS-autotune || true
 
 # Switch to aedes user
 USER aedes

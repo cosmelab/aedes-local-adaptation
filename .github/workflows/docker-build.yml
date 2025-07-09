@@ -54,6 +54,7 @@ jobs:
 
       - name: Build and push
         uses: docker/build-push-action@v4
+        timeout-minutes: 60
         with:
           context: .
           platforms: linux/amd64
@@ -66,3 +67,5 @@ jobs:
             type=gha
           cache-to: |
             type=gha,mode=max
+          build-args: |
+            BUILDKIT_INLINE_CACHE=1
