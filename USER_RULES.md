@@ -159,6 +159,10 @@
 - ✅ **Test commands** before suggesting them
 - ✅ **Use safe defaults** for all parameters
 - ✅ **Provide clear error messages** if commands fail
+- ✅ **ALWAYS use run_terminal_cmd tool with is_background: true**
+- ✅ **ALWAYS use the run button - it works properly now**
+- ✅ **NEVER suggest manual command execution unless explicitly requested**
+- ✅ **Use the same shell session - do not open new terminals**
 
 ### **Example Implementation:**
 
@@ -239,6 +243,6 @@ Fixed the issue.
 
 ---
 
-**Last Updated:** July 2025
+**Last Updated:** July 2025 (Updated terminal execution rules - run button works)
 **Project:** Aedes Local Adaptation Analysis
 **Purpose:** Ensure transparent, safe, and predictable AI assistance for local adaptation analysis
