@@ -94,96 +94,51 @@
 
 ## 💻 **Terminal Command Execution Rules:**
 
-### **Cursor Terminal Response Fix:**
+### **Cursor Terminal - Updated (Bug Fixed!):**
 
-**Problem:** Cursor's wrapper times out when it sees no output, causing commands to hang and requiring manual intervention.
+**Great News:** Cursor's terminal execution has been improved and the run button works reliably now!
 
-**Solution:** Use these rules to guarantee output or immediate backgrounding:
+### **Current Best Practices:**
 
-### **1. MANDATORY Background Execution:**
+### **1. Use the Run Button (Recommended):**
 
-- ✅ **ALWAYS set `is_background: true`** for ALL terminal commands
-- ✅ **NEVER use foreground** unless user explicitly says "run foreground"
-- ✅ **Assume every command may exit before I notice**
-- ✅ **This is the PRIMARY fix for hanging issues**
+- ✅ **Use the run button** - it works properly and is the preferred method
+- ✅ **Commands execute reliably** without hanging issues
+- ✅ **Good for both simple and complex commands**
+- ✅ **Maintains proper shell session state**
 
-### **2. Enhanced Completion Detection:**
+### **2. Background Execution (When Needed):**
 
-- ✅ **Use multiple sentinels** for reliability:
-  ```bash
-  command && echo "COMPLETE: $(date)" && echo __CURSOR_DONE__
-  ```
-- ✅ **Add status codes** to sentinels:
-  ```bash
-  command && echo "EXIT_CODE: $?" && echo __CURSOR_DONE__
-  ```
-- ✅ **Use unique identifiers** for each command:
-  ```bash
-  command && echo "CMD_DONE_$(date +%s)" && echo __CURSOR_DONE__
-  ```
+- ✅ **Use `is_background: true`** for long-running commands (>30 seconds)
+- ✅ **Use `is_background: true`** for commands that might need interruption
+- ✅ **Foreground is fine** for quick commands and standard operations
 
-### **3. Pre-sanitize Interactive Commands:**
+### **3. Command Best Practices:**
 
-- ✅ **Add non-interactive flags** to avoid prompts:
+- ✅ **Use non-interactive flags** to avoid prompts:
   - `--yes`, `--quiet`, `--no-verify`, `--no-optional-locks`
   - `-y` for package managers
   - `--force` when safe to do so
   - `--no-interaction` for any interactive tools
 
-### **4. Script-Based Execution for Complex Commands:**
+### **4. Error Handling:**
 
-- ✅ **Create temporary scripts** for multiple commands:
-  ```bash
-  cat > temp_script.sh << 'EOF'
-  #!/bin/bash
-  set -e
-  command1
-  command2
-  echo "SCRIPT_COMPLETE: $(date)"
-  echo __CURSOR_DONE__
-  EOF
-  chmod +x temp_script.sh
-  ```
-- ✅ **Execute script with background flag**
-- ✅ **Clean up temporary scripts** after execution
-
-### **5. Immediate Fallback Plan:**
-
-- ✅ **If command stalls after 5s** of idle output, notify user immediately
-- ✅ **Provide exact command** for manual execution
-- ✅ **Suggest alternative approaches** (script-based, manual execution)
-- ✅ **Don't wait indefinitely** for command completion
-
-### **6. Command Validation:**
-
-- ✅ **Test commands** before suggesting them
-- ✅ **Use safe defaults** for all parameters
 - ✅ **Provide clear error messages** if commands fail
-- ✅ **ALWAYS use run_terminal_cmd tool with is_background: true**
-- ✅ **ALWAYS use the run button - it works properly now**
-- ✅ **NEVER suggest manual command execution unless explicitly requested**
-- ✅ **Use the same shell session - do not open new terminals**
+- ✅ **Use safe defaults** for all parameters
+- ✅ **Test commands** before suggesting them
+- ✅ **Use the same shell session** - do not open new terminals
 
 ### **Example Implementation:**
 
 ```bash
-# Good - Background with enhanced sentinel
-python3 -c "print(1+1)" && echo "COMPLETE: $(date)" && echo __CURSOR_DONE__
+# Good - Simple command (run button works great)
+python3 -c "print('Hello World')"
 
-# Good - Non-interactive with status
-git push --quiet && echo "EXIT_CODE: $?" && echo __CURSOR_DONE__
+# Good - Package installation
+pip install package-name --quiet
 
-# Good - Script-based execution
-cat > temp_git_push.sh << 'EOF'
-#!/bin/bash
-set -e
-git add .
-git commit -m "update [skip ci]"
-git push origin main
-echo "GIT_PUSH_COMPLETE: $(date)"
-echo __CURSOR_DONE__
-EOF
-chmod +x temp_git_push.sh
+# Good - Long-running command (use background)
+# Set is_background: true for commands that take >30 seconds
 ```
 
 ## 📚 **Special Rules for This Project:**
@@ -243,6 +198,6 @@ Fixed the issue.
 
 ---
 
-**Last Updated:** July 2025 (Updated terminal execution rules - run button works)
+**Last Updated:** January 2025 (Updated terminal execution rules - Cursor bug fixed, run button works reliably)
 **Project:** Aedes Local Adaptation Analysis
 **Purpose:** Ensure transparent, safe, and predictable AI assistance for local adaptation analysis

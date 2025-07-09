@@ -19,9 +19,9 @@ echo ""
 check_package() {
     local package=$1
     local channel=$2
-    
-    # Use mamba repoquery to check package availability
-    if mamba repoquery search -c "$channel" "$package" &>/dev/null; then
+
+    # Use micromamba repoquery to check package availability
+    if micromamba repoquery search -c "$channel" "$package" &>/dev/null; then
         return 0
     else
         return 1
@@ -32,26 +32,26 @@ check_package() {
 check_package_version() {
     local package_spec=$1
     local channels="-c conda-forge -c bioconda"
-    
+
     # Extract package name and version
     if [[ $package_spec =~ ^([^=]+)(=(.+))?$ ]]; then
         local package="${BASH_REMATCH[1]}"
         local version="${BASH_REMATCH[3]}"
-        
+
         echo -n "Checking $package_spec... "
-        
+
         # First check if package exists at all
-        if mamba repoquery search $channels "$package" &>/dev/null; then
+        if micromamba repoquery search $channels "$package" &>/dev/null; then
             if [ -n "$version" ]; then
                 # Check specific version
-                if mamba repoquery search $channels "${package}=${version}" &>/dev/null; then
+                if micromamba repoquery search $channels "${package}=${version}" &>/dev/null; then
                     echo -e "${GREEN}✓ Available${NC}"
                     AVAILABLE+=("$package_spec")
                 else
                     # Check what versions are available
                     echo -e "${YELLOW}⚠ Package exists but not version $version${NC}"
                     echo -n "  Available versions: "
-                    mamba repoquery search $channels "$package" 2>/dev/null | grep -E "^${package} " | awk '{print $2}' | sort -V | tail -5 | tr '\n' ' '
+                    micromamba repoquery search $channels "$package" 2>/dev/null | grep -E "^${package} " | awk '{print $2}' | sort -V | tail -5 | tr '\n' ' '
                     echo ""
                     WARNINGS+=("$package_spec - version $version not found")
                 fi
@@ -66,44 +66,33 @@ check_package_version() {
     fi
 }
 
-# List of packages from the Dockerfile
+# List of packages from the Dockerfile (micromamba install commands)
 PACKAGES=(
-    # Core system packages
+    # Core system packages (first micromamba install block)
     "libstdcxx-ng"
     "python=3.11.7"
-    "starship"
-    "datamash"
-    "openjdk=17"
     "pip"
-    # Compiler tools
     "gcc"
     "make"
     "cmake"
     "gsl"
     "cython"
-    # Jupyter ecosystem
-    "jupyter"
-    "jupyterlab"
-    "notebook"
-    "ipykernel"
-    # Core Python stack
-    "scikit-allel"
-    "cyvcf2"
-    "pandas"
     "numpy"
     "scipy"
+    "pandas"
     "matplotlib"
     "seaborn"
-    "plotly"
-    "scikit-learn"
+    "scikit-allel"
+    "cyvcf2"
     "pyfaidx"
     "pysam"
     "biopython"
+    "scikit-learn"
+    "plotly"
     "bokeh"
     "altair"
     "holoviews"
     "networkx"
-    # Geospatial packages
     "geopandas"
     "fiona"
     "rasterio"
@@ -113,8 +102,7 @@ PACKAGES=(
     "contextily"
     "earthpy"
     "geoplot"
-    # WGS analysis tools
-    "angsd"
+    # Genomics tools (second micromamba install block)
     "samtools"
     "bcftools"
     "vcftools"
@@ -122,18 +110,33 @@ PACKAGES=(
     "htslib"
     "tabix"
     "bwa"
-    # Population genetics
     "plink"
     "plink2"
+    "angsd"
     "admixture"
     "iqtree"
-    # R packages
+    "starship"
+    "datamash"
+    "openjdk=17"
+    "sra-tools"
+    "entrez-direct"
+    "snakemake"
+    "jupyter"
+    "jupyterlab"
+    "notebook"
+    "ipykernel"
+    # R and R packages (third micromamba install block)
     "r-base=4.3.2"
     "r-devtools"
     "r-tidyverse"
     "r-ggplot2"
     "r-here"
     "r-data.table"
+    "r-ade4"
+    "r-mass"
+    "r-vegan"
+    "r-seqinr"
+    "r-qqconf"
     "r-sf"
     "r-raster"
     "r-adegenet"
@@ -144,29 +147,20 @@ PACKAGES=(
     "r-leaflet"
     "r-networkd3"
     "r-tmap"
-    "r-ade4"
-    "r-mass"
-    "r-vegan"
-    "r-seqinr"
-    "r-qqconf"
-    # Bioconductor
     "bioconductor-variantannotation"
     "bioconductor-snprelate"
     "bioconductor-annotationdbi"
     "bioconductor-biomart"
     "bioconductor-biostrings"
-    # Other tools
-    "sra-tools"
-    "entrez-direct"
-    "snakemake"
     "ruby=3.2.2"
 )
 
-# Check if mamba is installed
-if ! command -v mamba &> /dev/null; then
-    echo -e "${RED}Error: mamba is not installed. Please install mamba/micromamba first.${NC}"
+# Check if micromamba is installed
+if ! command -v micromamba &> /dev/null; then
+    echo -e "${RED}Error: micromamba is not installed. Please install micromamba first.${NC}"
     echo "You can install it with:"
     echo "  curl -Ls https://micro.mamba.pm/api/micromamba/linux-64/latest | tar -xvj bin/micromamba"
+    echo "Or use the containerized environment which includes micromamba."
     exit 1
 fi
 
@@ -256,7 +250,7 @@ if [[ $REPLY =~ ^[Yy]$ ]]; then
         "ggspatial" "fields" "grid" "ellipse" "reshape2" "admixr" "qvalue"
         "genomation" "regioneR"
     )
-    
+
     if command -v R &> /dev/null; then
         for pkg in "${R_PACKAGES[@]}"; do
             echo -n "Checking R package $pkg... "

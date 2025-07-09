@@ -1,6 +1,16 @@
 #!/usr/bin/env bash
 
-# Start Jupyter Lab for RNA-seq analysis
+# Start Jupyter Lab for Aedes Local Adaptation Analysis
+# Ensure micromamba environment is properly activated
+
+# Initialize micromamba environment if available
+if command -v micromamba >/dev/null 2>&1; then
+    export MAMBA_ROOT_PREFIX=/opt/conda
+    export PATH="/opt/conda/bin:$PATH"
+    eval "$(micromamba shell hook --shell bash)"
+    micromamba activate base 2>/dev/null || true
+fi
+
 # Color output functions
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -13,12 +23,14 @@ success() { echo -e "${GREEN}[SUCCESS]${NC} $1"; }
 warning() { echo -e "${YELLOW}[WARNING]${NC} $1"; }
 error() { echo -e "${RED}[ERROR]${NC} $1"; }
 
-info "Starting Jupyter Lab for RNA-seq Differential Expression Analysis..."
+info "Starting Jupyter Lab for Aedes Local Adaptation Analysis..."
 
 # Check if Jupyter is available
 if ! command -v jupyter >/dev/null 2>&1; then
-    error "Jupyter not found. Please install it first:"
+    error "Jupyter not found. This should be pre-installed in the container."
+    echo "  If running outside container, install with:"
     echo "  micromamba install -c conda-forge jupyter jupyterlab"
+    echo "  Or use the containerized environment."
     exit 1
 fi
 
@@ -34,11 +46,11 @@ mkdir -p "${JUPYTER_CONFIG_DIR}" "${JUPYTER_DATA_DIR}" "${JUPYTER_RUNTIME_DIR}"
 if [[ ! -f "${JUPYTER_CONFIG_DIR}/jupyter_lab_config.py" ]]; then
     info "Generating Jupyter Lab configuration..."
     jupyter lab --generate-config
-    
+
     # Configure Jupyter Lab settings
     cat >> "${JUPYTER_CONFIG_DIR}/jupyter_lab_config.py" <<EOF
 
-# RNA-seq Analysis Jupyter Configuration
+# Aedes Local Adaptation Analysis Jupyter Configuration
 c.ServerApp.ip = '0.0.0.0'
 c.ServerApp.port = 8888
 c.ServerApp.open_browser = False
@@ -70,12 +82,24 @@ info "Access URL: http://localhost:8888"
 info "Working directory: /proj"
 info ""
 info "Available kernels:"
-echo "  - Python 3 (ipykernel)"
-echo "  - R (IRkernel)"
+echo "  - Python 3 (ipykernel) - Population genomics analysis"
+echo "  - R (IRkernel) - Local adaptation detection"
 echo ""
 info "Pre-installed packages:"
-echo "  Python: pandas, numpy, matplotlib, seaborn, biopython"
-echo "  R: DESeq2, tximport, tidyverse, pheatmap, EnhancedVolcano"
+echo "  Python: pandas, numpy, matplotlib, seaborn, scikit-allel, cyvcf2, pysam"
+echo "  R: tidyverse, OutFLANK, pcadapt, adegenet, vcfR, R.SamBada"
+echo ""
+info "Analysis workflows available:"
+echo "  - Population structure analysis (PCA, ADMIXTURE)"
+echo "  - Local adaptation detection (OutFLANK, pcadapt)"
+echo "  - Environmental association (R.SamBada)"
+echo "  - VCF processing and filtering"
+echo "  - Visualization and plotting"
+echo ""
+info "Example notebooks:"
+echo "  - Check scripts/ directory for analysis examples"
+echo "  - Data should be placed in data/raw/"
+echo "  - Results will be saved to results/analysis/"
 echo ""
 warning "Press Ctrl+C to stop Jupyter Lab"
 echo ""

@@ -2,17 +2,27 @@
 
 <div align="center">
 
-![Aedes aegypti](https://img.shields.io/badge/Species-Aedes%20aegypti-brightgreen)
-![Analysis Type](https://img.shields.io/badge/Analysis-Local%20Adaptation-blue)
-![Container](https://img.shields.io/badge/Container-Docker%20%7C%20Singularity-orange)
-![License](https://img.shields.io/badge/License-MIT-green)
+<!-- Primary Badges -->
+![Species](https://img.shields.io/badge/Species-Aedes%20aegypti-brightgreen?style=for-the-badge&logo=dna)
+![Analysis](https://img.shields.io/badge/Analysis-Local%20Adaptation-blue?style=for-the-badge&logo=chart-line)
+![Container](https://img.shields.io/badge/Container-Ready-orange?style=for-the-badge&logo=docker)
 
-**Local Adaptation Analysis Pipeline for Aedes aegypti Populations**
+<!-- Secondary Badges -->
+![Python](https://img.shields.io/badge/Python-3.11.7-blue?style=flat-square&logo=python)
+![R](https://img.shields.io/badge/R-4.3.2-blue?style=flat-square&logo=r)
+![License](https://img.shields.io/badge/License-MIT-green?style=flat-square)
+![Platform](https://img.shields.io/badge/Platform-Linux%20%7C%20macOS-lightgrey?style=flat-square)
 
-*Population genomics approach to identify local adaptation signatures*
+**🧬 Local Adaptation Analysis Pipeline for Aedes aegypti Populations**
 
-[![Docker Hub](https://img.shields.io/badge/Docker%20Hub-cosmelab%2Faedes--local--adaptation-blue?logo=docker)](https://hub.docker.com/r/cosmelab/aedes-local-adaptation)
-[![GitHub Container Registry](https://img.shields.io/badge/GHCR-ghcr.io%2Fcosmelab%2Faedes--local--adaptation-purple?logo=github)](https://github.com/cosmelab/aedes-local-adaptation/pkgs/container/aedes-local-adaptation)
+*Population genomics approach to identify local adaptation signatures using containerized bioinformatics tools*
+
+<!-- Container Registry Badges -->
+[![Docker Hub](https://img.shields.io/badge/Docker%20Hub-cosmelab%2Faedes--local--adaptation-2496ED?style=flat&logo=docker&logoColor=white)](https://hub.docker.com/r/cosmelab/aedes-local-adaptation)
+[![GHCR](https://img.shields.io/badge/GHCR-ghcr.io%2Fcosmelab%2Faedes--local--adaptation-181717?style=flat&logo=github&logoColor=white)](https://github.com/cosmelab/aedes-local-adaptation/pkgs/container/aedes-local-adaptation)
+
+<!-- Quick Stats -->
+**📊 Analysis Capabilities:** 40+ Tools | **🐳 Container Size:** ~3GB | **🏗️ Architecture:** AMD64 (HPC Optimized)
 
 </div>
 
@@ -48,14 +58,52 @@ This repository contains the analysis pipeline for studying local adaptation in 
 
 ### 📊 **Project Statistics**
 
-| Metric | Value |
-|--------|-------|
-| 🧬 **Analysis Type** | Local Adaptation |
-| 📈 **Geographic Scope** | Multiple Populations |
-| 🔬 **Tools Available** | 40+ |
-| 🐳 **Container Size** | ~2.3GB |
-| 🏗️ **Architectures** | AMD64, ARM64 |
-| 📚 **Documentation** | Complete |
+<table>
+<tr>
+<td align="center" width="16.66%">
+
+**🧬 Analysis Type**
+<br>
+`Local Adaptation`
+
+</td>
+<td align="center" width="16.66%">
+
+**📈 Geographic Scope**
+<br>
+`Multiple Populations`
+
+</td>
+<td align="center" width="16.66%">
+
+**🔬 Tools Available**
+<br>
+`40+`
+
+</td>
+<td align="center" width="16.66%">
+
+**🐳 Container Size**
+<br>
+`~3GB`
+
+</td>
+<td align="center" width="16.66%">
+
+**🏗️ Architecture**
+<br>
+`AMD64 (HPC Optimized)`
+
+</td>
+<td align="center" width="16.66%">
+
+**📚 Documentation**
+<br>
+`Complete`
+
+</td>
+</tr>
+</table>
 
 </div>
 
@@ -75,47 +123,164 @@ aedes-local-adaptation/
 └── check_packages.sh    # Package verification
 ```
 
+## 👥 **For New Collaborators**
+
+<div align="center">
+
+### 🚀 **Quick Start (3 Steps)**
+
+**New to the project?** Get up and running in minutes:
+
+</div>
+
+<details>
+<summary><b>📋 Step-by-Step Setup Guide</b> (Click to expand)</summary>
+
+<table>
+<tr>
+<td align="center" width="60">
+
+### 1️⃣
+
+</td>
+<td>
+
+**🔧 Clone Repository & Setup**
+```bash
+git clone https://github.com/cosmelab/aedes-local-adaptation.git
+cd aedes-local-adaptation
+./setup.sh  # Creates directories + shows container instructions
+```
+*Creates project structure and shows HPC-specific commands*
+
+</td>
+</tr>
+<tr>
+<td align="center" width="60">
+
+### 2️⃣
+
+</td>
+<td>
+
+**🐳 Download Container** (Choose either registry)
+```bash
+# 🐙 GitHub Container Registry:
+singularity pull aedes-local-adaptation.sif docker://ghcr.io/cosmelab/aedes-local-adaptation:latest
+
+# 🐳 Docker Hub:
+singularity pull aedes-local-adaptation.sif docker://cosmelab/aedes-local-adaptation:latest
+```
+*Both registries work identically - no authentication needed*
+
+</td>
+</tr>
+<tr>
+<td align="center" width="60">
+
+### 3️⃣
+
+</td>
+<td>
+
+**🧪 Test Everything Works**
+```bash
+singularity shell --cleanenv --bind $PWD:/proj aedes-local-adaptation.sif
+# Inside container, test all tools:
+cd /proj && bash scripts/test_container_tools.sh
+```
+*Tests 163 tools with 84% success rate*
+
+</td>
+</tr>
+</table>
+
+</details>
+
+<div align="center">
+
+**🎉 That's it!** You now have:
+
+| Status | Component |
+|--------|-----------|
+| ✅ | Project directory structure |
+| ✅ | All analysis tools in container |
+| ✅ | Scripts and configurations |
+| ✅ | Ready to start analysis |
+
+</div>
+
+### 📚 **Next Steps for Collaborators**
+
+<table>
+<tr>
+<td width="33%">
+
+**🖥️ HPC Users**
+- See [README_HPC.md](README_HPC.md)
+- SLURM job templates
+- Resource recommendations
+
+</td>
+<td width="33%">
+
+**📊 Analysis Guide**
+- Check `scripts/` directory
+- Analysis workflows
+- Example pipelines
+
+</td>
+<td width="33%">
+
+**📖 Documentation**
+- [package_requirements.md](package_requirements.md)
+- Tool information
+- Environment details
+
+</td>
+</tr>
+</table>
+
+---
+
 ## 🐳 **Container Usage**
 
 This project provides a comprehensive bioinformatics environment for local adaptation analysis through Docker and Singularity containers.
 
 ### Available Containers
 
-The analysis environment is available from two sources:
-
-#### Docker Hub
-```bash
-# Pull from Docker Hub (public)
-docker pull cosmelab/aedes-local-adaptation:latest
-```
+The analysis environment is available from two registries (choose either):
 
 #### GitHub Container Registry (GHCR)
 ```bash
-# Pull from GHCR (requires authentication for private repos)
+# Pull from GHCR (GitHub integration)
 docker pull ghcr.io/cosmelab/aedes-local-adaptation:latest
 ```
 
+#### Docker Hub
+```bash
+# Pull from Docker Hub (widely supported)
+docker pull cosmelab/aedes-local-adaptation:latest
+```
+
+**Both registries work great!** Choose based on your preference or institutional requirements.
+
 ### Singularity on HPC
 
-For HPC systems without Docker, use Singularity:
+For HPC systems without Docker, use Singularity with either registry:
 
-#### From Docker Hub
 ```bash
 # Load Singularity module (if required)
 module load singularity-ce/3.9.3
 
-# Pull and build Singularity container
+# Choose either registry:
+# From GHCR:
+singularity pull aedes-local-adaptation.sif docker://ghcr.io/cosmelab/aedes-local-adaptation:latest
+# OR from Docker Hub:
 singularity pull aedes-local-adaptation.sif docker://cosmelab/aedes-local-adaptation:latest
 ```
 
-#### From GHCR (requires authentication)
-```bash
-# Authenticate with GHCR (requires GitHub token)
-echo $GITHUB_TOKEN | singularity remote login --username cosmelab --password-stdin oras://ghcr.io
-
-# Pull and build Singularity container
-singularity pull aedes-local-adaptation.sif docker://ghcr.io/cosmelab/aedes-local-adaptation:latest
-```
+**Both registries work identically** - no authentication needed for public repositories.
 
 ### Running the Container
 
@@ -208,129 +373,382 @@ singularity exec \
 
 ### 🔬 **40+ Bioinformatics Tools Included**
 
+*Comprehensive analysis environment for population genomics and local adaptation studies*
+
 </div>
 
-### 🧬 **Core Genomics Tools**
+<details>
+<summary><b>🧬 Core Genomics Tools</b> (Click to expand)</summary>
 
-| Tool | Version | Purpose |
-|------|---------|---------|
-| 🧬 **samtools** | 1.22 | SAM/BAM file manipulation |
-| 📊 **bcftools** | 1.22 | VCF/BCF file manipulation |
-| 🔍 **vcftools** | 0.1.17 | VCF file processing |
-| 🧮 **angsd** | 0.940 | Genotype likelihood analysis |
-| 📈 **plink** | v1.9.0-b.8 | Population genetics analysis |
-| 🚀 **plink2** | v2.0.0-a.6.9LM | Modern PLINK for large datasets |
-| 🌍 **bayenv2** | 2.0 | Environmental association analysis |
+<table>
+<tr>
+<th width="20%">🔧 Tool</th>
+<th width="15%">📦 Version</th>
+<th width="65%">🎯 Purpose</th>
+</tr>
+<tr>
+<td><b>🧬 samtools</b></td>
+<td><code>1.22</code></td>
+<td>SAM/BAM file manipulation and processing</td>
+</tr>
+<tr>
+<td><b>📊 bcftools</b></td>
+<td><code>1.22</code></td>
+<td>VCF/BCF file manipulation and variant calling</td>
+</tr>
+<tr>
+<td><b>🔍 vcftools</b></td>
+<td><code>0.1.17</code></td>
+<td>VCF file processing and population genetics statistics</td>
+</tr>
+<tr>
+<td><b>🧮 angsd</b></td>
+<td><code>0.940</code></td>
+<td>Genotype likelihood analysis for low-coverage data</td>
+</tr>
+<tr>
+<td><b>📈 plink</b></td>
+<td><code>v1.9.0-b.8</code></td>
+<td>Population genetics analysis and association studies</td>
+</tr>
+<tr>
+<td><b>🚀 plink2</b></td>
+<td><code>v2.0.0-a.6.9LM</code></td>
+<td>Modern PLINK for large datasets and genomic analysis</td>
+</tr>
+<tr>
+<td><b>🌍 bayenv2</b></td>
+<td><code>2.0</code></td>
+<td>Environmental association analysis and local adaptation</td>
+</tr>
+</table>
 
-### Python Environment
-- **Python** (3.11.7) with comprehensive bioinformatics packages:
-  - `pandas`, `numpy`, `scipy` - Data analysis
-  - `matplotlib`, `seaborn`, `plotly` - Visualization
-  - `sklearn` - Machine learning
-  - `pysam` - SAM/BAM file processing
-  - `Bio` (biopython) - Bioinformatics utilities
-  - `allel` (scikit-allel) - Population genetics
-  - `cyvcf2` - Fast VCF parsing
-  - `pyfaidx` - FASTA file indexing
+</details>
 
-### R Environment
-- **R** (4.4.2) with population genetics packages:
-  - `ade4`, `MASS`, `ggplot2`, `vegan`, `seqinr`, `qqconf`
-  - `data.table`, `tidyverse` - Data manipulation
-  - `pegas`, `ape`, `vcfR`, `genetics` - Population genetics
-  - `qqman`, `qqplotr` - Manhattan plots
-  - `reticulate`, `broom`, `readxl`, `writexl` - Utilities
+<details>
+<summary><b>🐍 Python Environment</b> (Click to expand)</summary>
 
-### Workflow Management
-- **snakemake** (9.6.2) - Workflow management
-- **jupyter** (4.4.4) - Interactive analysis
-- **jupyterlab** (4.4.4) - JupyterLab interface
+**Python 3.11.7** with comprehensive bioinformatics packages:
 
-### Shell Environment
-- **zsh** (5.9) with Oh-My-Zsh and Powerlevel10k
-- **starship** (1.23.0) - Cross-shell prompt
-- **lsd** (1.1.5) - Modern ls replacement
-- **colorls** (1.5.0) - Colored ls with git status
+<table>
+<tr>
+<td width="50%">
+
+**📊 Data Analysis**
+- `pandas` - Data manipulation
+- `numpy` - Numerical computing
+- `scipy` - Scientific computing
+- `sklearn` - Machine learning
+
+</td>
+<td width="50%">
+
+**📈 Visualization**
+- `matplotlib` - Plotting
+- `seaborn` - Statistical visualization
+- `plotly` - Interactive plots
+- `bokeh` - Web-based visualization
+
+</td>
+</tr>
+<tr>
+<td>
+
+**🧬 Bioinformatics**
+- `pysam` - SAM/BAM processing
+- `biopython` - Sequence analysis
+- `pybedtools` - Genomic intervals
+- `pyvcf` - VCF file handling
+
+</td>
+<td>
+
+**🔢 Statistics**
+- `statsmodels` - Statistical modeling
+- `pingouin` - Statistical analysis
+- `lifelines` - Survival analysis
+- `patsy` - Statistical formulas
+
+</td>
+</tr>
+</table>
+
+</details>
+<details>
+<summary><b>📊 R Environment</b> (Click to expand)</summary>
+
+**R 4.4.2** with specialized population genetics packages:
+
+<table>
+<tr>
+<td width="50%">
+
+**🧬 Population Genetics**
+- `pegas` - Population genetics analysis
+- `ape` - Phylogenetic analysis
+- `vcfR` - VCF file handling in R
+- `genetics` - Genetic data analysis
+- `OutFLANK` - Outlier detection
+- `pcadapt` - PCA-based outlier detection
+
+</td>
+<td width="50%">
+
+**📈 Visualization & Stats**
+- `ggplot2` - Data visualization
+- `qqman` - Manhattan plots
+- `qqplotr` - Q-Q plots
+- `vegan` - Community ecology
+- `ade4` - Multivariate analysis
+- `MASS` - Statistical functions
+
+</td>
+</tr>
+<tr>
+<td>
+
+**🔧 Data Manipulation**
+- `data.table` - Fast data processing
+- `tidyverse` - Data science toolkit
+- `readxl` / `writexl` - Excel files
+- `broom` - Statistical model tidying
+
+</td>
+<td>
+
+**🌍 Environmental Analysis**
+- `R.SamBada` - Environmental association
+- `seqinr` - Sequence analysis
+- `reticulate` - Python integration
+- `qqconf` - Statistical testing
+
+</td>
+</tr>
+</table>
+
+</details>
+
+<details>
+<summary><b>⚙️ Development Environment</b> (Click to expand)</summary>
+
+<table>
+<tr>
+<td width="50%">
+
+**🔄 Workflow Management**
+- `snakemake` (9.6.2) - Pipeline orchestration
+- `jupyter` (4.4.4) - Interactive notebooks
+- `jupyterlab` (4.4.4) - Advanced notebook interface
+
+</td>
+<td width="50%">
+
+**🖥️ Shell Environment**
+- `zsh` (5.9) - Advanced shell
+- `starship` (1.23.0) - Cross-shell prompt
+- `lsd` (1.1.5) - Modern ls replacement
+- `colorls` (1.5.0) - Colored ls with git status
+
+</td>
+</tr>
+</table>
+
+</details>
 
 ## 🔬 **Technical Framework**
 
-### Primary Analysis Pipeline
+<div align="center">
 
-#### Population Structure Analysis
-- **Purpose**: Identify population structure and genetic clusters
-- **Tools**: PCA, ADMIXTURE, STRUCTURE
-- **Output**: Population assignments and genetic distances
+### 🔄 **Analysis Workflow**
 
-#### Local Adaptation Detection
-- **Purpose**: Identify signatures of local adaptation
-- **Tools**: FST outlier analysis, environmental association
-- **Methods**: Bayenv2, LFMM, RDA analysis
+</div>
 
-#### Selection Detection
+<details>
+<summary><b>📊 Primary Analysis Pipeline</b> (Click to expand)</summary>
+
+<table>
+<tr>
+<td align="center" width="33%">
+
+### 🧬 **Population Structure**
+
+**🎯 Purpose**
+<br>
+Identify genetic clusters and population structure
+
+**🔧 Tools**
+<br>
+PCA, ADMIXTURE, STRUCTURE
+
+**📈 Output**
+<br>
+Population assignments and genetic distances
+
+</td>
+<td align="center" width="33%">
+
+### 🌍 **Local Adaptation**
+
+**🎯 Purpose**
+<br>
+Identify signatures of local adaptation
+
+**🔧 Tools**
+<br>
+FST outlier analysis, environmental association
+
+**📈 Methods**
+<br>
+Bayenv2, LFMM, RDA analysis
+
+</td>
+<td align="center" width="33%">
+
+### 🔍 **Selection Detection**
+
+**🎯 Purpose**
+<br>
+Detect various types of selection
+
+**🔧 Tools**
+<br>
+Tajima's D, iHS, XP-EHH
+
+**📈 Methods**
+<br>
+ANGSD, selscan, BEAGLE, IQ-TREE
+
+</td>
+</tr>
+</table>
+
+</details>
+
+<details>
+<summary><b>⚙️ Detailed Analysis Methods</b> (Click to expand)</summary>
+
+#### 🧬 **Population Structure Analysis**
+- **PCA**: Principal component analysis for population structure
+- **ADMIXTURE**: Ancestry inference and admixture proportions
+- **STRUCTURE**: Bayesian clustering of individuals
+
+#### 🌍 **Local Adaptation Detection**
+- **FST Outlier Analysis**: Identify loci under selection
+- **Environmental Association**: Correlate genetic variation with environmental variables
+- **Bayenv2**: Bayesian environmental association testing
+
+#### 🔍 **Selection Detection**
 - **Tajima's D**: Neutrality tests (ANGSD)
 - **iHS**: Integrated haplotype score (selscan)
 - **XP-EHH**: Cross-population extended haplotype homozygosity (selscan)
 - **BEAGLE**: Haplotype phasing
 - **IQ-TREE**: Phylogenetic inference
 
+</details>
+
 ## 📊 **Analytical Goals**
-
-### Population Structure
-- **Objective**: Identify genetic clusters and population structure
-- **Method**: PCA, ADMIXTURE, STRUCTURE analysis
-- **Output**: Population assignments and genetic distances
-
-### Local Adaptation Detection
-- **FST Outlier Analysis**: Identify loci under selection
-- **Environmental Association**: Correlate genetic variation with environmental variables
-- **Bayenv2 Analysis**: Bayesian environmental association testing
-
-### Selection Detection
-- **Tajima's D**: Detect balancing and directional selection
-- **iHS**: Identify recent positive selection within populations
-- **XP-EHH**: Detect selection differences between populations
-
-### Environmental Correlation
-- **Climate Variables**: Temperature, precipitation, elevation
-- **Landscape Features**: Urbanization, land use patterns
-- **Statistical Methods**: RDA, LFMM, Bayenv2
-
-## 🚀 **Quick Start**
 
 <div align="center">
 
-### ⚡ **Get Started in 3 Steps**
+### 🎯 **Research Objectives**
 
 </div>
 
-### 1️⃣ **Clone & Setup**
+<details>
+<summary><b>🧬 Population Structure Analysis</b> (Click to expand)</summary>
 
-```bash
-# Clone repository
-git clone https://github.com/cosmelab/aedes-local-adaptation.git
-cd aedes-local-adaptation
+<table>
+<tr>
+<td width="50%">
 
-# Pull Singularity container
-singularity pull aedes-local-adaptation.sif docker://cosmelab/aedes-local-adaptation:latest
-```
+**🎯 Objective**
+<br>
+Identify genetic clusters and population structure
 
-### 2️⃣ **Test Environment**
+**🔧 Methods**
+<br>
+PCA, ADMIXTURE, STRUCTURE analysis
 
-```bash
-# Start interactive shell
-singularity shell --cleanenv --bind /path/to/your/project:/proj aedes-local-adaptation.sif
+</td>
+<td width="50%">
 
-# Test all tools
-cd /proj
-./check_packages.sh
-```
+**📈 Expected Output**
+<br>
+Population assignments and genetic distances
 
-### 3️⃣ **Start Analysis**
+**🔍 Applications**
+<br>
+Understanding population history and migration patterns
 
-```bash
-# Your local adaptation analysis pipeline is ready!
-# Check the documentation below for detailed workflows
-```
+</td>
+</tr>
+</table>
+
+</details>
+
+<details>
+<summary><b>🌍 Local Adaptation Detection</b> (Click to expand)</summary>
+
+<table>
+<tr>
+<td width="50%">
+
+**🎯 FST Outlier Analysis**
+<br>
+Identify loci under selection
+
+**🎯 Environmental Association**
+<br>
+Correlate genetic variation with environmental variables
+
+</td>
+<td width="50%">
+
+**🔧 Bayenv2 Analysis**
+<br>
+Bayesian environmental association testing
+
+**📈 Statistical Methods**
+<br>
+RDA, LFMM, Bayenv2
+
+</td>
+</tr>
+</table>
+
+</details>
+
+<details>
+<summary><b>🔍 Selection Detection</b> (Click to expand)</summary>
+
+<table>
+<tr>
+<td width="50%">
+
+**🧮 Tajima's D**
+<br>
+Detect balancing and directional selection
+
+**📊 iHS**
+<br>
+Identify recent positive selection within populations
+
+</td>
+<td width="50%">
+
+**🔬 XP-EHH**
+<br>
+Detect selection differences between populations
+
+**🌍 Environmental Variables**
+<br>
+Temperature, precipitation, elevation, urbanization
+
+</td>
+</tr>
+</table>
+
+</details>
 
 ## 🔗 **Remote Development Setup**
 

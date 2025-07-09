@@ -46,10 +46,8 @@ venv/
 # Jupyter
 .ipynb_checkpoints/
 
-# Docker
-Dockerfile
-docker-compose.yml
-.dockerignore
+# Docker build context optimization
+# Note: Dockerfile, docker-compose.yml, and .dockerignore are needed for builds
 
 # Singularity containers
 *.sif
