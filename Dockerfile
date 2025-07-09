@@ -195,18 +195,19 @@ RUN R -e "install.packages(c('data.table', 'tidyverse', 'qqman', 'qqplotr', 'ret
 RUN R -e "if (!requireNamespace('BiocManager', quietly = TRUE)) install.packages('BiocManager'); \
     BiocManager::install(c('LEA'), update = FALSE, ask = FALSE)"
 
-# Install GitHub R packages for local adaptation (with error handling)
-RUN R -e "devtools::install_github('uqrmaie1/admixtools') || TRUE; \
-    devtools::install_github('gearslaboratory/gdalUtils', force = TRUE) || TRUE; \
-    devtools::install_github('petrelharp/templater') || TRUE; \
-    devtools::install_github('petrelharp/local_pca/lostruct') || TRUE; \
-    remotes::install_github('eriqande/TESS3_encho_sen') || TRUE; \
-    remotes::install_github('eriqande/genoscapeRtools') || TRUE; \
-    devtools::install_github('SolangeD/R.SamBada', build_vignettes = FALSE) || TRUE; \
-    devtools::install_github('bcm-uga/lfmm') || TRUE; \
-    devtools::install_github('bcm-uga/TESS3_encho_sen') || TRUE; \
-    devtools::install_github('bcm-uga/LEA') || TRUE; \
-    devtools::install_github('petrikemppainen/LDna', ref = 'v.2.15') || TRUE"
+# Install GitHub R packages for local adaptation
+RUN R -e "options(Ncpus = 4); \
+    tryCatch(devtools::install_github('uqrmaie1/admixtools'), error = function(e) print(paste('Failed:', e))); \
+    tryCatch(devtools::install_github('gearslaboratory/gdalUtils', force = TRUE), error = function(e) print(paste('Failed:', e))); \
+    tryCatch(devtools::install_github('petrelharp/templater'), error = function(e) print(paste('Failed:', e))); \
+    tryCatch(devtools::install_github('petrelharp/local_pca/lostruct'), error = function(e) print(paste('Failed:', e))); \
+    tryCatch(remotes::install_github('eriqande/TESS3_encho_sen'), error = function(e) print(paste('Failed:', e))); \
+    tryCatch(remotes::install_github('eriqande/genoscapeRtools'), error = function(e) print(paste('Failed:', e))); \
+    tryCatch(devtools::install_github('SolangeD/R.SamBada', build_vignettes = FALSE), error = function(e) print(paste('Failed:', e))); \
+    tryCatch(devtools::install_github('bcm-uga/lfmm'), error = function(e) print(paste('Failed:', e))); \
+    tryCatch(devtools::install_github('bcm-uga/TESS3_encho_sen'), error = function(e) print(paste('Failed:', e))); \
+    tryCatch(devtools::install_github('bcm-uga/LEA'), error = function(e) print(paste('Failed:', e))); \
+    tryCatch(devtools::install_github('petrikemppainen/LDna', ref = 'v.2.15'), error = function(e) print(paste('Failed:', e)))"
 
 # Install Python packages not in conda-forge
 RUN pip3 install --no-cache-dir pong
