@@ -51,6 +51,7 @@ venv/
 
 # Singularity containers
 *.sif
+singularity_temp_cache/
 
 # Personal information and HPC-specific files
 nf-core/configs/hpc_batch.conf

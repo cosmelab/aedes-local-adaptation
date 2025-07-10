@@ -186,19 +186,45 @@ RUN micromamba install --channel-priority strict -c conda-forge -c bioconda \
     -y && micromamba clean --all --yes
 
 # Install R packages for population genetics and local adaptation analysis
-RUN R -e "install.packages(c('data.table', 'tidyverse', 'qqman', 'qqplotr', 'reticulate', 'broom', \
-    'readxl', 'writexl', 'knitr', 'rmarkdown', 'pegas', 'ape', 'phangorn', 'vcfR', 'genetics', \
-    'BiocManager', 'remotes', 'scales', 'ggrepel', 'ggtext', 'ggvenn', 'ggstatsplot', 'ggforce', \
-    'ggpattern', 'scatterpie', 'RColorBrewer', 'extrafont', 'forcats', 'flextable', 'officer', \
-    'Cairo', 'dartR', 'OutFLANK', 'geosphere', 'rnaturalearth', 'rnaturalearthdata', 'ggspatial', \
-    'fields', 'grid', 'ellipse', 'reshape2', 'admixr', 'qvalue', 'genomation', 'regioneR'), \
-    repos='https://cloud.r-project.org/', dependencies=TRUE, Ncpus=4)" && \
-    # Verify critical R packages are installed
-    R -e "if(!require('dartR')) stop('dartR package failed to install'); if(!require('OutFLANK')) stop('OutFLANK package failed to install'); if(!require('qvalue')) stop('qvalue package failed to install'); if(!require('genomation')) stop('genomation package failed to install'); cat('Critical R packages verified\\n')"
+# Split into smaller batches to avoid timeout and memory issues
+RUN R -e "options(repos = c(CRAN = 'https://cloud.r-project.org/'), timeout = 600); \
+    install.packages(c('data.table', 'tidyverse', 'qqman', 'qqplotr', 'reticulate', 'broom', \
+    'readxl', 'writexl', 'knitr', 'rmarkdown', 'pegas', 'ape', 'phangorn', 'vcfR', 'genetics'), \
+    dependencies=TRUE, Ncpus=4)"
 
-# Install Bioconductor packages
+RUN R -e "options(repos = c(CRAN = 'https://cloud.r-project.org/'), timeout = 600); \
+    install.packages(c('BiocManager', 'remotes', 'scales', 'ggrepel', 'ggtext', 'ggvenn', \
+    'ggstatsplot', 'ggforce', 'ggpattern', 'scatterpie', 'RColorBrewer', 'extrafont', \
+    'forcats', 'flextable', 'officer', 'Cairo'), dependencies=TRUE, Ncpus=4)"
+
+# Install packages that commonly have issues separately
+RUN R -e "options(repos = c(CRAN = 'https://cloud.r-project.org/'), timeout = 600); \
+    install.packages('fields', dependencies=TRUE, Ncpus=4)"
+
+RUN R -e "options(repos = c(CRAN = 'https://cloud.r-project.org/'), timeout = 600); \
+    install.packages('OutFLANK', dependencies=TRUE, Ncpus=4)"
+
+RUN R -e "options(repos = c(CRAN = 'https://cloud.r-project.org/'), timeout = 600); \
+    install.packages('qvalue', dependencies=TRUE, Ncpus=4)"
+
+# Install dartR with its dependencies
+RUN R -e "options(repos = c(CRAN = 'https://cloud.r-project.org/'), timeout = 600); \
+    if (!requireNamespace('BiocManager', quietly = TRUE)) install.packages('BiocManager'); \
+    BiocManager::install('SNPRelate', update = FALSE, ask = FALSE); \
+    install.packages('dartR', dependencies=TRUE, Ncpus=4)"
+
+# Install Bioconductor packages including genomation
 RUN R -e "if (!requireNamespace('BiocManager', quietly = TRUE)) install.packages('BiocManager'); \
-    BiocManager::install(c('LEA'), update = FALSE, ask = FALSE)"
+    BiocManager::install(c('genomation', 'regioneR', 'LEA'), update = FALSE, ask = FALSE)"
+
+# Install remaining packages
+RUN R -e "options(repos = c(CRAN = 'https://cloud.r-project.org/'), timeout = 600); \
+    install.packages(c('geosphere', 'rnaturalearth', 'rnaturalearthdata', 'ggspatial', \
+    'grid', 'ellipse', 'reshape2', 'admixr'), dependencies=TRUE, Ncpus=4)"
+
+# Verify critical packages
+RUN R -e "library(dartR); library(OutFLANK); library(qvalue); library(genomation); \
+    cat('All critical R packages verified successfully\n')"
 
 # Install GitHub R packages with error handling
 RUN R -e "options(Ncpus = 4); \

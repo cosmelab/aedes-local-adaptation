@@ -147,6 +147,7 @@ Thumbs.db
 
 # Singularity containers
 *.sif
+singularity_temp_cache/
 
 # Configuration files should stay in repo
 # .prettierignore, .prettierrc, .dockerignore are tracked
