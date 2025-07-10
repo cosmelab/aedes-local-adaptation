@@ -146,7 +146,7 @@ aedes-local-adaptation/
 <td>
 
 **🔧 Clone Repository & Setup**
-```bash
+```zsh
 git clone https://github.com/cosmelab/aedes-local-adaptation.git
 cd aedes-local-adaptation
 ./setup.sh  # Creates directories + shows container instructions
@@ -164,7 +164,7 @@ cd aedes-local-adaptation
 <td>
 
 **🐳 Download Container** (Choose either registry)
-```bash
+```zsh
 # 🐙 GitHub Container Registry:
 singularity pull aedes-local-adaptation.sif docker://ghcr.io/cosmelab/aedes-local-adaptation:latest
 
@@ -184,10 +184,10 @@ singularity pull aedes-local-adaptation.sif docker://cosmelab/aedes-local-adapta
 <td>
 
 **🧪 Test Everything Works**
-```bash
+```zsh
 singularity shell --cleanenv --bind $PWD:/proj aedes-local-adaptation.sif
 # Inside container, test all tools:
-cd /proj && bash scripts/test_container_tools.sh
+cd /proj && zsh scripts/test_container_tools.sh
 ```
 *Comprehensive tool testing*
 
@@ -285,7 +285,7 @@ singularity pull aedes-local-adaptation.sif docker://cosmelab/aedes-local-adapta
 ### Running the Container
 
 #### Interactive Shell
-```bash
+```zsh
 # Start interactive shell with project directory mounted
 singularity shell \
     --cleanenv \
