@@ -11,7 +11,7 @@
 ![Python](https://img.shields.io/badge/Python-3.11.7-blue?style=flat-square&logo=python)
 ![R](https://img.shields.io/badge/R-4.3.2-blue?style=flat-square&logo=r)
 ![License](https://img.shields.io/badge/License-MIT-green?style=flat-square)
-![Platform](https://img.shields.io/badge/Platform-Linux%20%7C%20macOS-lightgrey?style=flat-square)
+![Platform](https://img.shields.io/badge/Platform-Linux%20HPC-lightgrey?style=flat-square)
 
 **🧬 Local Adaptation Analysis Pipeline for Aedes aegypti Populations**
 
@@ -189,7 +189,7 @@ singularity shell --cleanenv --bind $PWD:/proj aedes-local-adaptation.sif
 # Inside container, test all tools:
 cd /proj && bash scripts/test_container_tools.sh
 ```
-*Tests 163 tools with 84% success rate*
+*Comprehensive tool testing*
 
 </td>
 </tr>

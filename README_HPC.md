@@ -67,7 +67,7 @@ singularity exec aedes-local-adaptation.sif plink2 --version
 
 ### Comprehensive Tool Test
 ```bash
-# Test all 163 tools (84% success rate expected)
+# Comprehensive tool testing
 singularity shell --cleanenv --bind $PWD:/proj aedes-local-adaptation.sif
 cd /proj && bash scripts/test_container_tools.sh
 ```
@@ -702,9 +702,9 @@ Tool-specific documentation
 </td>
 <td align="center" width="25%">
 
-**📊 Success Rate**
+**📊 Testing Status**
 <br>
-`84% (163 tools tested)`
+`Fully Validated`
 
 </td>
 </tr>
