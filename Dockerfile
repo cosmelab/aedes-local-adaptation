@@ -115,7 +115,9 @@ RUN micromamba install --channel-priority strict -c conda-forge -c bioconda \
     contextily \
     earthpy \
     geoplot \
-    -y && micromamba clean --all --yes
+    -y && micromamba clean --all --yes && \
+    # Verify critical packages are installed
+    python -c "import pysam; import allel; import cyvcf2; print('Critical Python packages verified')"
 
 # Install genomics tools
 RUN micromamba install --channel-priority strict -c conda-forge -c bioconda \
@@ -181,7 +183,9 @@ RUN R -e "install.packages(c('data.table', 'tidyverse', 'qqman', 'qqplotr', 'ret
     'ggpattern', 'scatterpie', 'RColorBrewer', 'extrafont', 'forcats', 'flextable', 'officer', \
     'Cairo', 'dartR', 'OutFLANK', 'geosphere', 'rnaturalearth', 'rnaturalearthdata', 'ggspatial', \
     'fields', 'grid', 'ellipse', 'reshape2', 'admixr', 'qvalue', 'genomation', 'regioneR'), \
-    repos='https://cloud.r-project.org/', dependencies=TRUE, Ncpus=4)"
+    repos='https://cloud.r-project.org/', dependencies=TRUE, Ncpus=4)" && \
+    # Verify critical R packages are installed
+    R -e "if(!require('dartR')) stop('dartR package failed to install'); if(!require('OutFLANK')) stop('OutFLANK package failed to install'); if(!require('qvalue')) stop('qvalue package failed to install'); if(!require('genomation')) stop('genomation package failed to install'); cat('Critical R packages verified\\n')"
 
 # Install Bioconductor packages
 RUN R -e "if (!requireNamespace('BiocManager', quietly = TRUE)) install.packages('BiocManager'); \
@@ -189,17 +193,17 @@ RUN R -e "if (!requireNamespace('BiocManager', quietly = TRUE)) install.packages
 
 # Install GitHub R packages with error handling
 RUN R -e "options(Ncpus = 4); \
-    tryCatch(devtools::install_github('uqrmaie1/admixtools'), error = function(e) print(paste('Failed:', e))); \
-    tryCatch(devtools::install_github('gearslaboratory/gdalUtils', force = TRUE), error = function(e) print(paste('Failed:', e))); \
-    tryCatch(devtools::install_github('petrelharp/templater'), error = function(e) print(paste('Failed:', e))); \
-    tryCatch(devtools::install_github('petrelharp/local_pca/lostruct'), error = function(e) print(paste('Failed:', e))); \
-    tryCatch(remotes::install_github('eriqande/TESS3_encho_sen'), error = function(e) print(paste('Failed:', e))); \
-    tryCatch(remotes::install_github('eriqande/genoscapeRtools'), error = function(e) print(paste('Failed:', e))); \
-    tryCatch(devtools::install_github('SolangeD/R.SamBada', build_vignettes = FALSE), error = function(e) print(paste('Failed:', e))); \
-    tryCatch(devtools::install_github('bcm-uga/lfmm'), error = function(e) print(paste('Failed:', e))); \
-    tryCatch(devtools::install_github('bcm-uga/TESS3_encho_sen'), error = function(e) print(paste('Failed:', e))); \
-    tryCatch(devtools::install_github('bcm-uga/LEA'), error = function(e) print(paste('Failed:', e))); \
-    tryCatch(devtools::install_github('petrikemppainen/LDna', ref = 'v.2.15'), error = function(e) print(paste('Failed:', e)))"
+    devtools::install_github('uqrmaie1/admixtools'); \
+    devtools::install_github('gearslaboratory/gdalUtils', force = TRUE); \
+    devtools::install_github('petrelharp/templater'); \
+    devtools::install_github('petrelharp/local_pca/lostruct'); \
+    remotes::install_github('eriqande/TESS3_encho_sen'); \
+    remotes::install_github('eriqande/genoscapeRtools'); \
+    devtools::install_github('SolangeD/R.SamBada', build_vignettes = FALSE); \
+    devtools::install_github('bcm-uga/lfmm'); \
+    devtools::install_github('bcm-uga/TESS3_encho_sen'); \
+    devtools::install_github('bcm-uga/LEA'); \
+    devtools::install_github('petrikemppainen/LDna', ref = 'v.2.15')"
 
 # Install Python packages not in conda-forge
 RUN pip3 install --no-cache-dir pong
@@ -219,6 +223,7 @@ RUN set -e && \
     git clone --depth=1 https://github.com/DReichLab/AdmixTools.git && \
     cd AdmixTools && cd src && make && make install && cd .. && \
     ln -sf /opt/AdmixTools/bin/* /usr/local/bin/ && \
+    rm -rf /opt/AdmixTools/.git && \
     # BayeScan
     cd /opt && \
     wget --retry-connrefused --waitretry=1 --read-timeout=20 --timeout=15 -t 3 \
@@ -239,12 +244,20 @@ RUN set -e && \
     mv BA3-SNPS-Ubuntu64 BA3-SNPS && \
     chmod +x BA3-SNPS && \
     ln -sf /opt/BayesAss3-SNPs/BA3-SNPS /usr/local/bin/BA3-SNPS && \
+    rm -rf /opt/BayesAss3-SNPs/.git && \
     # BA3-SNPS-autotune
     cd /opt && \
     git clone --depth=1 https://github.com/stevemussmann/BA3-SNPS-autotune.git && \
     cd BA3-SNPS-autotune && \
     chmod +x BA3-SNPS-autotune.py && \
-    ln -sf /opt/BA3-SNPS-autotune/BA3-SNPS-autotune.py /usr/local/bin/BA3-SNPS-autotune || true
+    ln -sf /opt/BA3-SNPS-autotune/BA3-SNPS-autotune.py /usr/local/bin/BA3-SNPS-autotune && \
+    rm -rf /opt/BA3-SNPS-autotune/.git && \
+    # Verify critical analysis tools are installed and executable
+    test -x /usr/local/bin/bayescan && echo "BayeScan verified" && \
+    test -x /usr/local/bin/gemma && echo "GEMMA verified" && \
+    test -x /usr/local/bin/BA3-SNPS && echo "BA3-SNPS verified" && \
+    test -d /opt/AdmixTools && echo "AdmixTools verified" && \
+    echo "All critical analysis tools verified"
 
 # Create HPC module-compatible activation script
 RUN echo '#!/bin/zsh' > /opt/conda/bin/activate-env.sh && \
@@ -263,6 +276,11 @@ RUN git clone --depth=1 https://github.com/romkatv/powerlevel10k.git /tmp/powerl
     git clone --depth=1 https://github.com/zsh-users/zsh-completions.git /home/aedes/.oh-my-zsh/custom/plugins/zsh-completions && \
     git clone --depth=1 https://github.com/zsh-users/zsh-autosuggestions.git /home/aedes/.oh-my-zsh/custom/plugins/zsh-autosuggestions && \
     git clone --depth=1 https://github.com/zsh-users/zsh-syntax-highlighting.git /home/aedes/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting && \
+    rm -rf /home/aedes/.oh-my-zsh/.git && \
+    rm -rf /home/aedes/.oh-my-zsh/themes/dracula/.git && \
+    rm -rf /home/aedes/.oh-my-zsh/custom/plugins/zsh-completions/.git && \
+    rm -rf /home/aedes/.oh-my-zsh/custom/plugins/zsh-autosuggestions/.git && \
+    rm -rf /home/aedes/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting/.git && \
     cp /home/aedes/.oh-my-zsh/templates/zshrc.zsh-template /home/aedes/.zshrc && \
     sed -i 's/ZSH_THEME=".*"/ZSH_THEME="dracula\/dracula"/' /home/aedes/.zshrc && \
     sed -i 's/plugins=(git)/plugins=(git autojump zsh-completions zsh-autosuggestions zsh-syntax-highlighting)/' /home/aedes/.zshrc && \
@@ -296,6 +314,7 @@ RUN git clone --depth=1 https://github.com/romkatv/powerlevel10k.git /tmp/powerl
     mkdir -p ~/.fzf && \
     git clone --depth=1 https://github.com/junegunn/fzf.git ~/.fzf && \
     ~/.fzf/install --all && \
+    rm -rf ~/.fzf/.git && \
     echo '[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh' >> /home/aedes/.zshrc && \
     echo 'export FZF_BASE=~/.fzf' >> /home/aedes/.zshrc && \
     rm -rf /tmp/powerlevel10k
