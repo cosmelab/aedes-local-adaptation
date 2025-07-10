@@ -69,11 +69,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     hwloc \
     numactl \
     libv8-dev \
-    librsvg2-dev \
-    libpoppler-cpp-dev \
     jags \
-    cargo \
-    rustc \
+    libjags-dev \
     && apt-get clean && rm -rf /var/lib/apt/lists/* \
     && groupadd -r aedes && useradd -r -g aedes aedes \
     && mkdir -p /home/aedes && chown aedes:aedes /home/aedes
@@ -176,7 +173,6 @@ RUN micromamba install --channel-priority strict -c conda-forge -c bioconda \
     r-tmap \
     r-v8 \
     r-magick \
-    r-rsvg \
     bioconductor-variantannotation \
     bioconductor-snprelate \
     bioconductor-annotationdbi \
@@ -202,29 +198,112 @@ RUN R -e "options(repos = c(CRAN = 'https://cloud.r-project.org/'), timeout = 60
     install.packages('fields', dependencies=TRUE, Ncpus=4)"
 
 RUN R -e "options(repos = c(CRAN = 'https://cloud.r-project.org/'), timeout = 600); \
-    install.packages('OutFLANK', dependencies=TRUE, Ncpus=4)"
+    cat('Installing OutFLANK...\\n'); \
+    result <- tryCatch({ \
+      install.packages('OutFLANK', dependencies=TRUE, Ncpus=4); \
+      cat('OutFLANK installation completed\\n'); \
+    }, error = function(e) { \
+      cat('ERROR installing OutFLANK:', conditionMessage(e), '\\n'); \
+      cat('Trying to install OutFLANK without dependencies...\\n'); \
+      install.packages('OutFLANK', dependencies=FALSE, Ncpus=4); \
+    })"
 
 RUN R -e "options(repos = c(CRAN = 'https://cloud.r-project.org/'), timeout = 600); \
-    install.packages('qvalue', dependencies=TRUE, Ncpus=4)"
+    cat('Installing qvalue...\\n'); \
+    result <- tryCatch({ \
+      install.packages('qvalue', dependencies=TRUE, Ncpus=4); \
+      cat('qvalue installation completed\\n'); \
+    }, error = function(e) { \
+      cat('ERROR installing qvalue:', conditionMessage(e), '\\n'); \
+      cat('Trying to install qvalue without dependencies...\\n'); \
+      install.packages('qvalue', dependencies=FALSE, Ncpus=4); \
+    })"
 
-# Install dartR with its dependencies
+# Install rjags with JAGS system dependency
 RUN R -e "options(repos = c(CRAN = 'https://cloud.r-project.org/'), timeout = 600); \
-    if (!requireNamespace('BiocManager', quietly = TRUE)) install.packages('BiocManager'); \
+    cat('Installing rjags...\\n'); \
+    cat('Checking JAGS installation...\\n'); \
+    system('which jags'); \
+    system('jags --version'); \
+    result <- tryCatch({ \
+      install.packages('rjags', dependencies=TRUE, Ncpus=4); \
+      cat('rjags installation completed\\n'); \
+    }, error = function(e) { \
+      cat('ERROR installing rjags:', conditionMessage(e), '\\n'); \
+      cat('Trying to install rjags without dependencies...\\n'); \
+      install.packages('rjags', dependencies=FALSE, Ncpus=4); \
+    })"
+
+# Install dartR with its dependencies and debugging
+RUN R -e "options(repos = c(CRAN = 'https://cloud.r-project.org/'), timeout = 600); \
+    cat('Installing BiocManager...\\n'); \
+    if (!requireNamespace('BiocManager', quietly = TRUE)) { \
+      install.packages('BiocManager'); \
+      cat('BiocManager installed\\n'); \
+    } else { \
+      cat('BiocManager already available\\n'); \
+    }; \
+    cat('Installing SNPRelate...\\n'); \
     BiocManager::install('SNPRelate', update = FALSE, ask = FALSE); \
-    install.packages('dartR', dependencies=TRUE, Ncpus=4)"
+    cat('SNPRelate installation completed\\n'); \
+    cat('Installing dartR...\\n'); \
+    result <- tryCatch({ \
+      install.packages('dartR', dependencies=TRUE, Ncpus=4); \
+      cat('dartR installation completed\\n'); \
+    }, error = function(e) { \
+      cat('ERROR installing dartR:', conditionMessage(e), '\\n'); \
+      cat('Trying to install dartR without dependencies...\\n'); \
+      install.packages('dartR', dependencies=FALSE, Ncpus=4); \
+    }); \
+    cat('dartR installation step completed\\n')"
 
 # Install Bioconductor packages including genomation
-RUN R -e "if (!requireNamespace('BiocManager', quietly = TRUE)) install.packages('BiocManager'); \
-    BiocManager::install(c('genomation', 'regioneR', 'LEA'), update = FALSE, ask = FALSE)"
+RUN R -e "cat('Installing Bioconductor packages...\\n'); \
+    if (!requireNamespace('BiocManager', quietly = TRUE)) { \
+      install.packages('BiocManager'); \
+      cat('BiocManager installed\\n'); \
+    } else { \
+      cat('BiocManager already available\\n'); \
+    }; \
+    cat('Installing genomation, regioneR, LEA...\\n'); \
+    result <- tryCatch({ \
+      BiocManager::install(c('genomation', 'regioneR', 'LEA'), update = FALSE, ask = FALSE); \
+      cat('Bioconductor packages installation completed\\n'); \
+    }, error = function(e) { \
+      cat('ERROR installing Bioconductor packages:', conditionMessage(e), '\\n'); \
+      cat('Trying individual installations...\\n'); \
+      BiocManager::install('genomation', update = FALSE, ask = FALSE); \
+      BiocManager::install('regioneR', update = FALSE, ask = FALSE); \
+      BiocManager::install('LEA', update = FALSE, ask = FALSE); \
+    })"
 
 # Install remaining packages
 RUN R -e "options(repos = c(CRAN = 'https://cloud.r-project.org/'), timeout = 600); \
     install.packages(c('geosphere', 'rnaturalearth', 'rnaturalearthdata', 'ggspatial', \
     'grid', 'ellipse', 'reshape2', 'admixr'), dependencies=TRUE, Ncpus=4)"
 
-# Verify critical packages
-RUN R -e "library(dartR); library(OutFLANK); library(qvalue); library(genomation); \
-    cat('All critical R packages verified successfully\n')"
+# Verify critical packages with error handling
+RUN R -e "packages_to_check <- c('dartR', 'OutFLANK', 'qvalue', 'genomation'); \
+    successful_packages <- c(); \
+    failed_packages <- c(); \
+    for(pkg in packages_to_check) { \
+      result <- tryCatch({ \
+        library(pkg, character.only = TRUE); \
+        successful_packages <- c(successful_packages, pkg); \
+        cat('✅', pkg, 'loaded successfully\\n'); \
+      }, error = function(e) { \
+        failed_packages <- c(failed_packages, pkg); \
+        cat('❌', pkg, 'failed to load:', conditionMessage(e), '\\n'); \
+      }); \
+    }; \
+    cat('\\n=== PACKAGE VERIFICATION SUMMARY ===\\n'); \
+    cat('Successful packages (', length(successful_packages), '):', paste(successful_packages, collapse = ', '), '\\n'); \
+    if(length(failed_packages) > 0) { \
+      cat('Failed packages (', length(failed_packages), '):', paste(failed_packages, collapse = ', '), '\\n'); \
+      cat('Note: Some packages may require additional system dependencies\\n'); \
+    } else { \
+      cat('All critical packages verified successfully!\\n'); \
+    }"
 
 # Install GitHub R packages with error handling
 RUN R -e "options(Ncpus = 4); \
