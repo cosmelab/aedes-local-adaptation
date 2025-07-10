@@ -69,7 +69,7 @@ singularity exec aedes-local-adaptation.sif plink2 --version
 ```bash
 # Comprehensive tool testing
 singularity shell --cleanenv --bind $PWD:/proj aedes-local-adaptation.sif
-cd /proj && bash scripts/test_container_tools.sh
+cd /proj && zsh scripts/test_container_tools.sh
 ```
 
 </details>
@@ -361,12 +361,35 @@ export TMPDIR=/tmp/$USER
 mkdir -p $TMPDIR
 ```
 
-### Memory Management
-```bash
-# For large datasets, use scratch space
+### 💾 **Cache Management (Critical for HPC)**
+
+Singularity cache can quickly exceed home directory quotas. Always use temporary cache directories:
+
+```zsh
+# Check quota first
+check_quota home
+
+# Method 1: Use scratch space (if available)
 export SINGULARITY_CACHEDIR=/scratch/$USER/.singularity_cache
 export SINGULARITY_TMPDIR=/scratch/$USER/.singularity_tmp
 mkdir -p "$SINGULARITY_CACHEDIR" "$SINGULARITY_TMPDIR"
+
+# Method 2: Use current directory (bigdata/project space)
+mkdir -p ./singularity_temp_cache
+export SINGULARITY_CACHEDIR=$PWD/singularity_temp_cache
+
+# Pull container
+singularity pull aedes-local-adaptation.sif docker://ghcr.io/cosmelab/aedes-local-adaptation:latest
+
+# Clean up afterward
+rm -rf ./singularity_temp_cache
+unset SINGULARITY_CACHEDIR
+```
+
+### Quota Emergency Solution
+```zsh
+# If you're over quota and can't pull containers:
+rm -rf ~/.singularity/cache && mkdir -p ./singularity_temp_cache && export SINGULARITY_CACHEDIR=$PWD/singularity_temp_cache && singularity pull aedes-local-adaptation.sif docker://ghcr.io/cosmelab/aedes-local-adaptation:latest && rm -rf ./singularity_temp_cache && unset SINGULARITY_CACHEDIR
 ```
 
 ### Container Optimization

@@ -128,9 +128,17 @@
 - ✅ **Test commands** before suggesting them
 - ✅ **Use the same shell session** - do not open new terminals
 
+### **5. Shell Choice - MANDATORY:**
+
+- ✅ **ALWAYS use zsh** for all terminal commands and examples
+- ✅ **User has beautiful zsh setup** - respect their preference
+- ✅ **Use zsh syntax** in all code blocks and examples
+- ✅ **Never use bash** unless specifically required by HPC batch scripts
+- ✅ **Interactive commands must be zsh** - user spent time making it beautiful
+
 ### **Example Implementation:**
 
-```bash
+```zsh
 # Good - Simple command (run button works great)
 python3 -c "print('Hello World')"
 
@@ -198,6 +206,6 @@ Fixed the issue.
 
 ---
 
-**Last Updated:** January 2025 (Updated terminal execution rules - Cursor bug fixed, run button works reliably)
+**Last Updated:** January 2025 (Updated terminal execution rules - Cursor bug fixed, run button works reliably. Added mandatory zsh usage rule.)
 **Project:** Aedes Local Adaptation Analysis
 **Purpose:** Ensure transparent, safe, and predictable AI assistance for local adaptation analysis

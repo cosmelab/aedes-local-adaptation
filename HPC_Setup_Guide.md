@@ -69,11 +69,34 @@ singularity exec aedes-local-adaptation.sif micromamba --version
 singularity exec aedes-local-adaptation.sif plink2 --version
 ```
 
+### 💾 **Cache Management First!**
+
+**⚠️ IMPORTANT:** Before pulling containers, set up proper cache management to avoid quota issues:
+
+```zsh
+# Check your quota status
+check_quota home
+check_quota bigdata
+
+# Set up temporary cache (choose one method):
+
+# Method 1: Use current directory (recommended)
+mkdir -p ./singularity_temp_cache
+export SINGULARITY_CACHEDIR=$PWD/singularity_temp_cache
+
+# Method 2: Use scratch space (if available)
+export SINGULARITY_CACHEDIR=/scratch/$USER/.singularity_cache
+mkdir -p "$SINGULARITY_CACHEDIR"
+
+# Method 3: Emergency cleanup (if over quota)
+rm -rf ~/.singularity/cache
+```
+
 ### Comprehensive Tool Test
 ```bash
 # Test all 40+ tools comprehensively
 singularity shell --cleanenv --bind $PWD:/proj aedes-local-adaptation.sif
-cd /proj && bash scripts/test_container_tools.sh
+cd /proj && zsh scripts/test_container_tools.sh
 ```
 
 **🎯 The test script validates all tools including:**
@@ -644,7 +667,7 @@ singularity exec \
 </tr>
 <tr>
 <td><b>Tool not found</b></td>
-<td>Run <code>bash scripts/test_container_tools.sh</code> to verify installation.</td>
+<td>Run <code>zsh scripts/test_container_tools.sh</code> to verify installation.</td>
 </tr>
 </table>
 
@@ -661,7 +684,7 @@ singularity exec aedes-local-adaptation.sif env | grep -E "(PATH|CONDA|MAMBA)"
 singularity exec aedes-local-adaptation.sif micromamba list
 
 # Check tool availability
-singularity exec aedes-local-adaptation.sif bash scripts/test_container_tools.sh
+singularity exec aedes-local-adaptation.sif zsh scripts/test_container_tools.sh
 
 # Verify R packages
 singularity exec aedes-local-adaptation.sif Rscript -e "installed.packages()[,1]"
@@ -779,7 +802,7 @@ singularity exec aedes-local-adaptation.sif python3 -c "import pkg_resources; [p
 </tr>
 </table>
 
-*For comprehensive tool testing, run: `bash scripts/test_container_tools.sh`*
+*For comprehensive tool testing, run: `zsh scripts/test_container_tools.sh`*
 
 </div>
 

@@ -282,6 +282,53 @@ singularity pull aedes-local-adaptation.sif docker://cosmelab/aedes-local-adapta
 
 **Both registries work identically** - no authentication needed for public repositories.
 
+### 💾 **Cache Management (Important!)**
+
+Singularity uses a cache directory that can quickly fill up your home directory quota. Here's how to manage it:
+
+<details>
+<summary><b>🚨 Quota Issues & Solutions</b> (Click to expand)</summary>
+
+#### Check Your Quota
+```zsh
+# Check home directory quota
+check_quota home
+
+# Check cache size
+du -sh ~/.singularity/cache 2>/dev/null || echo "No cache found"
+```
+
+#### Use Temporary Cache (Recommended)
+```zsh
+# Create temporary cache in current directory (usually has more space)
+mkdir -p ./singularity_temp_cache
+export SINGULARITY_CACHEDIR=$PWD/singularity_temp_cache
+
+# Pull container with temporary cache
+singularity pull aedes-local-adaptation.sif docker://ghcr.io/cosmelab/aedes-local-adaptation:latest
+
+# Clean up temporary cache after successful pull
+rm -rf ./singularity_temp_cache
+unset SINGULARITY_CACHEDIR
+```
+
+#### One-Line Solution for Quota Issues
+```zsh
+# Remove old cache, pull with temp cache, clean up
+rm -rf ~/.singularity/cache && mkdir -p ./singularity_temp_cache && export SINGULARITY_CACHEDIR=$PWD/singularity_temp_cache && singularity pull aedes-local-adaptation.sif docker://ghcr.io/cosmelab/aedes-local-adaptation:latest && rm -rf ./singularity_temp_cache && unset SINGULARITY_CACHEDIR
+```
+
+#### Clean Up Existing Cache
+```zsh
+# Remove all cached images (frees up space)
+rm -rf ~/.singularity/cache
+
+# Or clean specific cache
+singularity cache clean
+```
+
+</details>
+
 ### Running the Container
 
 #### Interactive Shell

@@ -68,6 +68,12 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libmagickwand-dev \
     hwloc \
     numactl \
+    libv8-dev \
+    librsvg2-dev \
+    libpoppler-cpp-dev \
+    jags \
+    cargo \
+    rustc \
     && apt-get clean && rm -rf /var/lib/apt/lists/* \
     && groupadd -r aedes && useradd -r -g aedes aedes \
     && mkdir -p /home/aedes && chown aedes:aedes /home/aedes
@@ -168,6 +174,9 @@ RUN micromamba install --channel-priority strict -c conda-forge -c bioconda \
     r-leaflet \
     r-networkd3 \
     r-tmap \
+    r-v8 \
+    r-magick \
+    r-rsvg \
     bioconductor-variantannotation \
     bioconductor-snprelate \
     bioconductor-annotationdbi \

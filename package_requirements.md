@@ -60,12 +60,32 @@ No need to install packages individually
 <details>
 <summary><b>🐳 Container Usage Commands</b> (Click to expand)</summary>
 
-```bash
+```zsh
 # Docker
 docker run -it ghcr.io/cosmelab/aedes-local-adaptation:latest
 
-# Singularity (HPC)
-singularity exec aedes-local-adaptation.sif bash
+# Singularity (HPC) - Interactive shell
+singularity exec aedes-local-adaptation.sif zsh
+```
+
+### 💾 **Cache Management for HPC**
+
+Before pulling containers on HPC systems, set up proper cache management:
+
+```zsh
+# Check quota first
+check_quota home
+
+# Use temporary cache to avoid quota issues
+mkdir -p ./singularity_temp_cache
+export SINGULARITY_CACHEDIR=$PWD/singularity_temp_cache
+
+# Pull container
+singularity pull aedes-local-adaptation.sif docker://ghcr.io/cosmelab/aedes-local-adaptation:latest
+
+# Clean up
+rm -rf ./singularity_temp_cache
+unset SINGULARITY_CACHEDIR
 ```
 
 </details>
