@@ -69,7 +69,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     hwloc \
     numactl \
     libv8-dev \
-    jags \
     && apt-get clean && rm -rf /var/lib/apt/lists/* \
     && groupadd -r aedes && useradd -r -g aedes aedes \
     && mkdir -p /home/aedes && chown aedes:aedes /home/aedes
@@ -193,8 +192,10 @@ RUN R -e "options(repos = c(CRAN = 'https://cloud.r-project.org/'), timeout = 60
     'forcats', 'flextable', 'officer', 'Cairo'), dependencies=TRUE, Ncpus=4)"
 
 # Install packages that commonly have issues separately
-RUN R -e "options(repos = c(CRAN = 'https://cloud.r-project.org/'), timeout = 600); \
-    install.packages('fields', dependencies=TRUE, Ncpus=4)"
+# Note: Removed 'fields' package due to Eigen compilation errors
+# Alternative: Use base R functions for spatial statistics
+# RUN R -e "options(repos = c(CRAN = 'https://cloud.r-project.org/'), timeout = 600); \
+#     install.packages('fields', dependencies=TRUE, Ncpus=4)"
 
 RUN R -e "options(repos = c(CRAN = 'https://cloud.r-project.org/'), timeout = 600); \
     cat('Installing OutFLANK...\\n'); \
@@ -219,44 +220,54 @@ RUN R -e "options(repos = c(CRAN = 'https://cloud.r-project.org/'), timeout = 60
     })"
 
 # Install rjags with JAGS system dependency
-RUN R -e "options(repos = c(CRAN = 'https://cloud.r-project.org/'), timeout = 600); \
-    cat('Installing rjags...\\n'); \
-    cat('Checking JAGS installation...\\n'); \
-    system('which jags'); \
-    system('jags --version'); \
-    result <- tryCatch({ \
-      install.packages('rjags', dependencies=TRUE, Ncpus=4); \
-      cat('rjags installation completed\\n'); \
-    }, error = function(e) { \
-      cat('ERROR installing rjags:', conditionMessage(e), '\\n'); \
-      cat('Trying to install rjags without dependencies...\\n'); \
-      install.packages('rjags', dependencies=FALSE, Ncpus=4); \
-    })"
+# Note: Removed rjags and jags system dependency due to compilation issues
+# Alternative: Use other Bayesian packages like MCMCglmm, brms, or rstanarm
+# RUN R -e "options(repos = c(CRAN = 'https://cloud.r-project.org/'), timeout = 600); \
+#     cat('Installing rjags...\\n'); \
+#     cat('Checking JAGS installation...\\n'); \
+#     system('which jags'); \
+#     system('jags --version'); \
+#     result <- tryCatch({ \
+#       install.packages('rjags', dependencies=TRUE, Ncpus=4); \
+#       cat('rjags installation completed\\n'); \
+#     }, error = function(e) { \
+#       cat('ERROR installing rjags:', conditionMessage(e), '\\n'); \
+#       cat('Trying to install rjags without dependencies...\\n'); \
+#       install.packages('rjags', dependencies=FALSE, Ncpus=4); \
+#     })"
 
 # Install dartR with its dependencies and debugging
-RUN R -e "options(repos = c(CRAN = 'https://cloud.r-project.org/'), timeout = 600); \
-    cat('Installing BiocManager...\\n'); \
-    if (!requireNamespace('BiocManager', quietly = TRUE)) { \
-      install.packages('BiocManager'); \
-      cat('BiocManager installed\\n'); \
-    } else { \
-      cat('BiocManager already available\\n'); \
-    }; \
-    cat('Installing SNPRelate...\\n'); \
-    BiocManager::install('SNPRelate', update = FALSE, ask = FALSE); \
-    cat('SNPRelate installation completed\\n'); \
-    cat('Installing dartR...\\n'); \
-    result <- tryCatch({ \
-      install.packages('dartR', dependencies=TRUE, Ncpus=4); \
-      cat('dartR installation completed\\n'); \
-    }, error = function(e) { \
-      cat('ERROR installing dartR:', conditionMessage(e), '\\n'); \
-      cat('Trying to install dartR without dependencies...\\n'); \
-      install.packages('dartR', dependencies=FALSE, Ncpus=4); \
-    }); \
-    cat('dartR installation step completed\\n')"
+# Note: Removed dartR due to Eigen compilation errors
+# Alternative: Use adegenet and vcfR for genlight/genind conversions:
+# - Convert genlight to genind: as.genind(my_genlight)
+# - Convert genind to genlight: as.genlight(my_genind)
+# - Direct VCF to genind: vcfR2genind(vcf_object)
+# - Direct VCF to genlight: vcfR2genlight(vcf_object)
+# RUN R -e "options(repos = c(CRAN = 'https://cloud.r-project.org/'), timeout = 600); \
+#     cat('Installing BiocManager...\\n'); \
+#     if (!requireNamespace('BiocManager', quietly = TRUE)) { \
+#       install.packages('BiocManager'); \
+#       cat('BiocManager installed\\n'); \
+#     } else { \
+#       cat('BiocManager already available\\n'); \
+#     }; \
+#     cat('Installing SNPRelate...\\n'); \
+#     BiocManager::install('SNPRelate', update = FALSE, ask = FALSE); \
+#     cat('SNPRelate installation completed\\n'); \
+#     cat('Installing dartR...\\n'); \
+#     result <- tryCatch({ \
+#       install.packages('dartR', dependencies=TRUE, Ncpus=4); \
+#       cat('dartR installation completed\\n'); \
+#     }, error = function(e) { \
+#       cat('ERROR installing dartR:', conditionMessage(e), '\\n'); \
+#       cat('Trying to install dartR without dependencies...\\n'); \
+#       install.packages('dartR', dependencies=FALSE, Ncpus=4); \
+#     }); \
+#     cat('dartR installation step completed\\n')"
 
 # Install Bioconductor packages including genomation
+# Note: Removed genomation due to Eigen compilation errors
+# Alternative: Use other annotation packages like GenomicRanges, rtracklayer
 RUN R -e "cat('Installing Bioconductor packages...\\n'); \
     if (!requireNamespace('BiocManager', quietly = TRUE)) { \
       install.packages('BiocManager'); \
@@ -264,14 +275,13 @@ RUN R -e "cat('Installing Bioconductor packages...\\n'); \
     } else { \
       cat('BiocManager already available\\n'); \
     }; \
-    cat('Installing genomation, regioneR, LEA...\\n'); \
+    cat('Installing regioneR, LEA...\\n'); \
     result <- tryCatch({ \
-      BiocManager::install(c('genomation', 'regioneR', 'LEA'), update = FALSE, ask = FALSE); \
+      BiocManager::install(c('regioneR', 'LEA'), update = FALSE, ask = FALSE); \
       cat('Bioconductor packages installation completed\\n'); \
     }, error = function(e) { \
       cat('ERROR installing Bioconductor packages:', conditionMessage(e), '\\n'); \
       cat('Trying individual installations...\\n'); \
-      BiocManager::install('genomation', update = FALSE, ask = FALSE); \
       BiocManager::install('regioneR', update = FALSE, ask = FALSE); \
       BiocManager::install('LEA', update = FALSE, ask = FALSE); \
     })"
@@ -282,7 +292,8 @@ RUN R -e "options(repos = c(CRAN = 'https://cloud.r-project.org/'), timeout = 60
     'grid', 'ellipse', 'reshape2', 'admixr'), dependencies=TRUE, Ncpus=4)"
 
 # Verify critical packages with error handling
-RUN R -e "packages_to_check <- c('dartR', 'OutFLANK', 'qvalue', 'genomation'); \
+# Note: Updated to check only successfully installed packages
+RUN R -e "packages_to_check <- c('OutFLANK', 'qvalue'); \
     successful_packages <- c(); \
     failed_packages <- c(); \
     for(pkg in packages_to_check) { \
@@ -302,7 +313,12 @@ RUN R -e "packages_to_check <- c('dartR', 'OutFLANK', 'qvalue', 'genomation'); \
       cat('Note: Some packages may require additional system dependencies\\n'); \
     } else { \
       cat('All critical packages verified successfully!\\n'); \
-    }"
+    }; \
+    cat('\\n=== GENLIGHT/GENIND CONVERSION ALTERNATIVES ===\\n'); \
+    cat('Since dartR was removed, use these alternatives:\\n'); \
+    cat('- adegenet: as.genind(genlight_obj) or as.genlight(genind_obj)\\n'); \
+    cat('- vcfR: vcfR2genind(vcf_obj) or vcfR2genlight(vcf_obj)\\n'); \
+    cat('- Manual: df2genind(as.matrix(genlight_obj), sep=\"/\")\\n')"
 
 # Install GitHub R packages with error handling
 RUN R -e "options(Ncpus = 4); \
@@ -413,7 +429,7 @@ RUN git clone --depth=1 https://github.com/romkatv/powerlevel10k.git /tmp/powerl
     echo '# Color environment' >> /home/aedes/.zshrc && \
     echo 'export LSCOLORS="Gxfxcxdxbxegedabagacad"' >> /home/aedes/.zshrc && \
     echo 'export TERM="xterm-256color"' >> /home/aedes/.zshrc && \
-    echo 'export COLORTERM="truecolor"' >> /home/aedes/.zshrc && \
+    echo 'export COLORTERM="truecolor"' >> /home/aedes/.zshrc && \`
     echo 'export EZA_COLORS="ur=0:uw=0:ux=0:ue=0:gr=0:gw=0:gx=0:tr=0:tw=0:tx=0:su=0:sf=0:xa=0"' >> /home/aedes/.zshrc && \
     echo 'export COLORFGBG="15;0"' >> /home/aedes/.zshrc && \
     # Initialize micromamba (not conda)
