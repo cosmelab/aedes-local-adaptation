@@ -335,24 +335,23 @@ RUN R -e "options(Ncpus = 4); \
     devtools::install_github('petrikemppainen/LDna', ref = 'v.2.15')"
 
 # Verify R.SamBada installation and optionally download SamBada through R
-RUN R -e "if (!require('R.SamBada', quietly = TRUE)) { \
-    stop('R.SamBada failed to install!'); \
+RUN R -e 'if (!require("R.SamBada", quietly = TRUE)) { \
+    stop("R.SamBada failed to install!") \
     } else { \
-    cat('R.SamBada successfully installed\n'); \
-    cat('Available functions:\n'); \
-    print(ls('package:R.SamBada')); \
-    # Try to download sambada binary through R.SamBada if not already present \
-    if (!file.exists('/usr/local/bin/sambada')) { \
-      cat('Attempting to download SamBada binary through R.SamBada...\n'); \
+    cat("R.SamBada successfully installed\n") \
+    cat("Available functions:\n") \
+    print(ls("package:R.SamBada")) \
+    if (!file.exists("/usr/local/bin/sambada")) { \
+      cat("Attempting to download SamBada binary through R.SamBada...\n") \
       tryCatch({ \
-        R.SamBada::downloadSambada('/opt/sambada-r'); \
-        system('find /opt/sambada-r -name \"sambada*\" -type f -executable -exec ln -sf {} /usr/local/bin/ \\;'); \
-        cat('SamBada binary downloaded through R.SamBada\n'); \
+        R.SamBada::downloadSambada("/opt/sambada-r") \
+        system("find /opt/sambada-r -name sambada* -type f -executable | while read f; do ln -sf $f /usr/local/bin/; done") \
+        cat("SamBada binary downloaded through R.SamBada\n") \
       }, error = function(e) { \
-        cat('Note: Could not download SamBada binary through R.SamBada, but the R package is functional\n'); \
-      }); \
+        cat("Note: Could not download SamBada binary through R.SamBada, but the R package is functional\n") \
+      }) \
     } \
-    }"
+    }'
 
 # Install Python packages not in conda-forge
 RUN pip3 install --no-cache-dir pong
