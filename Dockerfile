@@ -429,7 +429,7 @@ RUN git clone --depth=1 https://github.com/romkatv/powerlevel10k.git /tmp/powerl
     echo '# Color environment' >> /home/aedes/.zshrc && \
     echo 'export LSCOLORS="Gxfxcxdxbxegedabagacad"' >> /home/aedes/.zshrc && \
     echo 'export TERM="xterm-256color"' >> /home/aedes/.zshrc && \
-    echo 'export COLORTERM="truecolor"' >> /home/aedes/.zshrc && \`
+    echo 'export COLORTERM="truecolor"' >> /home/aedes/.zshrc && \
     echo 'export EZA_COLORS="ur=0:uw=0:ux=0:ue=0:gr=0:gw=0:gx=0:tr=0:tw=0:tx=0:su=0:sf=0:xa=0"' >> /home/aedes/.zshrc && \
     echo 'export COLORFGBG="15;0"' >> /home/aedes/.zshrc && \
     # Initialize micromamba (not conda)
