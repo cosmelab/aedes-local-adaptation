@@ -342,11 +342,17 @@ RUN /opt/conda/bin/gem install colorls --no-document -n /usr/local/bin && \
     chmod +x /usr/local/bin/colorls
 
 # Download and install local adaptation tools with proper error handling
+# Fixed version that downloads SamBada directly instead of using R.SamBada's downloadSambada function
 RUN set -e && \
-    # SamBada
-    R -e "library(R.SamBada); downloadSambada('/opt/sambada')" && \
-    find /opt/sambada -name "sambada*" -type f -executable -exec chmod +x {} \; && \
-    find /opt/sambada -name "sambada*" -type f -executable -exec ln -sf {} /usr/local/bin/ \; && \
+    # SamBada - download directly
+    mkdir -p /opt/sambada && \
+    cd /opt/sambada && \
+    wget --retry-connrefused --waitretry=1 --read-timeout=20 --timeout=15 -t 3 \
+        https://github.com/SolangeD/SAMBADA/releases/download/v0.8.3/sambada-0.8.3-linux.zip && \
+    unzip sambada-0.8.3-linux.zip && \
+    chmod +x sambada-0.8.3-linux/binaries/sambada && \
+    ln -sf /opt/sambada/sambada-0.8.3-linux/binaries/sambada /usr/local/bin/sambada && \
+    rm -f sambada-0.8.3-linux.zip && \
     # AdmixTools
     cd /opt && \
     git clone --depth=1 https://github.com/DReichLab/AdmixTools.git && \
@@ -386,6 +392,7 @@ RUN set -e && \
     test -x /usr/local/bin/gemma && echo "GEMMA verified" && \
     test -x /usr/local/bin/BA3-SNPS && echo "BA3-SNPS verified" && \
     test -d /opt/AdmixTools && echo "AdmixTools verified" && \
+    test -x /usr/local/bin/sambada && echo "SamBada verified" && \
     echo "All critical analysis tools verified"
 
 # Create HPC module-compatible activation script
@@ -438,7 +445,7 @@ RUN git clone --depth=1 https://github.com/romkatv/powerlevel10k.git /tmp/powerl
     echo 'micromamba activate base' >> /home/aedes/.zshrc && \
     # Local adaptation tools
     echo '# Local adaptation tools' >> /home/aedes/.zshrc && \
-    echo 'export PATH="/opt/BayesAss3-SNPs:/opt/BA3-SNPS-autotune:/opt/sambada/binaries:$PATH"' >> /home/aedes/.zshrc && \
+    echo 'export PATH="/opt/BayesAss3-SNPs:/opt/BA3-SNPS-autotune:/opt/sambada/sambada-0.8.3-linux/binaries:$PATH"' >> /home/aedes/.zshrc && \
     # Install fzf
     mkdir -p ~/.fzf && \
     git clone --depth=1 https://github.com/junegunn/fzf.git ~/.fzf && \
