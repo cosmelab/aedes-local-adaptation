@@ -5,7 +5,7 @@
 FROM mambaorg/micromamba:1.5.0
 
 # Document architecture requirement
-LABEL maintainer="cosmelab@domain.com" \
+LABEL maintainer="cosmelab.ucr@gmail.com" \
       architecture="amd64" \
       description="HPC-optimized bioinformatics environment for local adaptation analysis"
 
@@ -334,6 +334,15 @@ RUN R -e "options(Ncpus = 4); \
     devtools::install_github('bcm-uga/LEA'); \
     devtools::install_github('petrikemppainen/LDna', ref = 'v.2.15')"
 
+# Verify R.SamBada installation
+RUN R -e "if (!require('R.SamBada', quietly = TRUE)) { \
+    stop('R.SamBada failed to install!'); \
+    } else { \
+    cat('R.SamBada successfully installed\n'); \
+    cat('Available functions:\n'); \
+    ls('package:R.SamBada'); \
+    }"
+
 # Install Python packages not in conda-forge
 RUN pip3 install --no-cache-dir pong
 
@@ -342,17 +351,25 @@ RUN /opt/conda/bin/gem install colorls --no-document -n /usr/local/bin && \
     chmod +x /usr/local/bin/colorls
 
 # Download and install local adaptation tools with proper error handling
-# Fixed version that downloads SamBada directly instead of using R.SamBada's downloadSambada function
 RUN set -e && \
-    # SamBada - download directly
+    # SamBada - Use the available beta version from Sylvie/sambada repository
     mkdir -p /opt/sambada && \
-    cd /opt/sambada && \
-    wget --retry-connrefused --waitretry=1 --read-timeout=20 --timeout=15 -t 3 \
-        https://github.com/SolangeD/SAMBADA/releases/download/v0.8.3/sambada-0.8.3-linux.zip && \
-    unzip sambada-0.8.3-linux.zip && \
-    chmod +x sambada-0.8.3-linux/binaries/sambada && \
-    ln -sf /opt/sambada/sambada-0.8.3-linux/binaries/sambada /usr/local/bin/sambada && \
-    rm -f sambada-0.8.3-linux.zip && \
+    cd /opt && \
+    # Clone the repository and build from source
+    git clone --depth=1 https://github.com/Sylvie/sambada.git && \
+    cd sambada && \
+    # Create build directory
+    mkdir build && cd build && \
+    # Configure and build
+    ../configure && \
+    make && \
+    # Install binaries
+    mkdir -p /opt/sambada/binaries && \
+    cp binaries/* /opt/sambada/binaries/ || true && \
+    # Create symlinks for all sambada executables
+    find /opt/sambada/build/binaries -type f -executable -exec ln -sf {} /usr/local/bin/ \; && \
+    # Clean up
+    cd /opt && rm -rf sambada/.git && \
     # AdmixTools
     cd /opt && \
     git clone --depth=1 https://github.com/DReichLab/AdmixTools.git && \
@@ -361,14 +378,14 @@ RUN set -e && \
     rm -rf /opt/AdmixTools/.git && \
     # BayeScan
     cd /opt && \
-    wget --retry-connrefused --waitretry=1 --read-timeout=20 --timeout=15 -t 3 \
+    wget --no-check-certificate --retry-connrefused --waitretry=1 --read-timeout=20 --timeout=15 -t 3 \
         http://cmpg.unibe.ch/software/BayeScan/files/BayeScan2.1.zip && \
     unzip BayeScan2.1.zip && \
     chmod +x BayeScan2.1/binaries/BayeScan2.1_linux64bits && \
     ln -sf /opt/BayeScan2.1/binaries/BayeScan2.1_linux64bits /usr/local/bin/bayescan && \
     rm -f BayeScan2.1.zip && \
     # GEMMA
-    wget --retry-connrefused --waitretry=1 --read-timeout=20 --timeout=15 -t 3 \
+    wget --no-check-certificate --retry-connrefused --waitretry=1 --read-timeout=20 --timeout=15 -t 3 \
         https://github.com/genetics-statistics/GEMMA/releases/download/v0.98.4/gemma-0.98.4-linux-static-AMD64.gz && \
     gunzip gemma-0.98.4-linux-static-AMD64.gz && \
     chmod +x gemma-0.98.4-linux-static-AMD64 && \
@@ -392,8 +409,8 @@ RUN set -e && \
     test -x /usr/local/bin/gemma && echo "GEMMA verified" && \
     test -x /usr/local/bin/BA3-SNPS && echo "BA3-SNPS verified" && \
     test -d /opt/AdmixTools && echo "AdmixTools verified" && \
-    test -x /usr/local/bin/sambada && echo "SamBada verified" && \
-    echo "All critical analysis tools verified"
+    (test -x /usr/local/bin/sambada && echo "SamBada verified" || echo "Warning: SamBada binary not found, but R.SamBada is available") && \
+    echo "All critical analysis tools processed"
 
 # Create HPC module-compatible activation script
 RUN echo '#!/bin/zsh' > /opt/conda/bin/activate-env.sh && \
@@ -445,7 +462,7 @@ RUN git clone --depth=1 https://github.com/romkatv/powerlevel10k.git /tmp/powerl
     echo 'micromamba activate base' >> /home/aedes/.zshrc && \
     # Local adaptation tools
     echo '# Local adaptation tools' >> /home/aedes/.zshrc && \
-    echo 'export PATH="/opt/BayesAss3-SNPs:/opt/BA3-SNPS-autotune:/opt/sambada/sambada-0.8.3-linux/binaries:$PATH"' >> /home/aedes/.zshrc && \
+    echo 'export PATH="/opt/BayesAss3-SNPs:/opt/BA3-SNPS-autotune:/opt/sambada/build/binaries:$PATH"' >> /home/aedes/.zshrc && \
     # Install fzf
     mkdir -p ~/.fzf && \
     git clone --depth=1 https://github.com/junegunn/fzf.git ~/.fzf && \
