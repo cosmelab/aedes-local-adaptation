@@ -172,7 +172,6 @@ RUN micromamba install --channel-priority strict -c conda-forge -c bioconda \
     r-v8 \
     r-magick \
     bioconductor-variantannotation \
-    bioconductor-gdsfmt \
     bioconductor-snprelate \
     bioconductor-annotationdbi \
     bioconductor-biomart \
@@ -335,15 +334,16 @@ RUN R -e "options(Ncpus = 4); \
     devtools::install_github('bcm-uga/LEA'); \
     devtools::install_github('petrikemppainen/LDna', ref = 'v.2.15')"
 
-# Install Bioconductor dependencies and R.SamBada with proper error handling
-RUN Rscript -e "install.packages('BiocManager')" \
- && Rscript -e "BiocManager::install(c('gdsfmt','SNPRelate'), ask=FALSE)" \
- && Rscript -e "install.packages('R.SamBada', dependencies=TRUE)" \
- && yes | Rscript -e "R.SamBada::downloadSambada('.')" \
- && ls -1 | grep sambada \
- && mv sambada* /usr/local/bin/ 2>/dev/null || echo "SamBada binary moved to /usr/local/bin" \
- && chmod +x /usr/local/bin/sambada* 2>/dev/null || echo "SamBada binary permissions set" \
- && test -x /usr/local/bin/sambada && echo "✓ SamBada binary verified" || echo "⚠ SamBada binary not found"
+# Verify R.SamBada installation only
+RUN R -e "if (!require('R.SamBada', quietly = TRUE)) { \
+    stop('R.SamBada failed to install!'); \
+    } else { \
+    cat('R.SamBada successfully installed\n'); \
+    cat('Available functions:\n'); \
+    print(ls('package:R.SamBada')); \
+    cat('\nNote: SamBada binary must be built from source\n'); \
+    cat('R.SamBada will use the sambada binary in PATH when running\n'); \
+    }"
 
 # Install Python packages not in conda-forge
 RUN pip3 install --no-cache-dir pong
@@ -352,12 +352,12 @@ RUN pip3 install --no-cache-dir pong
 RUN /opt/conda/bin/gem install colorls --no-document -n /usr/local/bin && \
     chmod +x /usr/local/bin/colorls
 
-    # Install additional build dependencies for other tools
-    RUN apt-get update && apt-get install -y --no-install-recommends \
-        autoconf \
-        automake \
-        libtool \
-        && apt-get clean && rm -rf /var/lib/apt/lists/*
+# Install additional build dependencies for other tools
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    autoconf \
+    automake \
+    libtool \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Download and install local adaptation tools with proper error handling
 RUN set -e && \
@@ -406,6 +406,7 @@ RUN set -e && \
     test -x /usr/local/bin/gemma && echo "✓ GEMMA verified" && \
     test -x /usr/local/bin/BA3-SNPS && echo "✓ BA3-SNPS verified" && \
     test -d /opt/AdmixTools && echo "✓ AdmixTools verified" && \
+    test -x /usr/local/bin/sambada && echo "✓ SamBada binary verified" && \
     echo "Installation of analysis tools completed"
 
 # Create HPC module-compatible activation script
