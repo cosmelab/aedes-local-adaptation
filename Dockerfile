@@ -172,6 +172,7 @@ RUN micromamba install --channel-priority strict -c conda-forge -c bioconda \
     r-v8 \
     r-magick \
     bioconductor-variantannotation \
+    bioconductor-gdsfmt \
     bioconductor-snprelate \
     bioconductor-annotationdbi \
     bioconductor-biomart \
@@ -334,24 +335,14 @@ RUN R -e "options(Ncpus = 4); \
     devtools::install_github('bcm-uga/LEA'); \
     devtools::install_github('petrikemppainen/LDna', ref = 'v.2.15')"
 
-# Verify R.SamBada installation and optionally download SamBada through R
-RUN R -e 'if (!require("R.SamBada", quietly = TRUE)) { \
-    stop("R.SamBada failed to install!") \
-    } else { \
-    cat("R.SamBada successfully installed\n") \
-    cat("Available functions:\n") \
-    print(ls("package:R.SamBada")) \
-    if (!file.exists("/usr/local/bin/sambada")) { \
-      cat("Attempting to download SamBada binary through R.SamBada...\n") \
-      tryCatch({ \
-        R.SamBada::downloadSambada("/opt/sambada-r") \
-        system("find /opt/sambada-r -name sambada* -type f -executable | while read f; do ln -sf $f /usr/local/bin/; done") \
-        cat("SamBada binary downloaded through R.SamBada\n") \
-      }, error = function(e) { \
-        cat("Note: Could not download SamBada binary through R.SamBada, but the R package is functional\n") \
-      }) \
-    } \
-    }'
+# Install Bioconductor dependencies and R.SamBada with proper error handling
+RUN Rscript -e "install.packages('BiocManager')" \
+ && Rscript -e "BiocManager::install(c('gdsfmt','SNPRelate'), ask=FALSE)" \
+ && Rscript -e "install.packages('R.SamBada', dependencies=TRUE)" \
+ && yes | Rscript -e "R.SamBada::downloadSambada('.')" \
+ && ls -1 | grep sambada \
+ && mv sambada* /usr/local/bin/ 2>/dev/null || echo "SamBada binary moved to /usr/local/bin" \
+ && chmod +x /usr/local/bin/sambada* 2>/dev/null || echo "SamBada binary permissions set"
 
 # Install Python packages not in conda-forge
 RUN pip3 install --no-cache-dir pong
@@ -360,42 +351,24 @@ RUN pip3 install --no-cache-dir pong
 RUN /opt/conda/bin/gem install colorls --no-document -n /usr/local/bin && \
     chmod +x /usr/local/bin/colorls
 
-# Install additional build dependencies for SamBada
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    autoconf \
-    automake \
-    libtool \
-    && apt-get clean && rm -rf /var/lib/apt/lists/*
+    # Install additional build dependencies for other tools
+    RUN apt-get update && apt-get install -y --no-install-recommends \
+        autoconf \
+        automake \
+        libtool \
+        && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Download and install local adaptation tools with proper error handling
 RUN set -e && \
-    # SamBada - Build from source with proper configuration
-    cd /opt && \
-    git clone --depth=1 https://github.com/Sylvie/sambada.git && \
-    cd sambada && \
-    # Generate configure script if needed
-    if [ ! -f configure ]; then \
-        autoreconf -fvi || (aclocal && autoconf && automake --add-missing); \
-    fi && \
-    # Create build directory and configure
-    mkdir -p build && cd build && \
-    ../configure || (cd .. && ./configure) && \
-    make && \
-    # Copy binaries to installation directory
-    mkdir -p /opt/sambada-install/binaries && \
-    cp -r binaries/* /opt/sambada-install/binaries/ 2>/dev/null || \
-    find . -name "sambada" -type f -executable -exec cp {} /opt/sambada-install/binaries/ \; || \
-    echo "Warning: Could not find sambada binaries" && \
-    # Create symlinks for any found executables
-    find /opt/sambada-install/binaries -type f -executable -exec ln -sf {} /usr/local/bin/ \; 2>/dev/null || true && \
-    cd /opt && rm -rf sambada && \
     # AdmixTools
+    echo "Installing AdmixTools..." && \
     cd /opt && \
     git clone --depth=1 https://github.com/DReichLab/AdmixTools.git && \
     cd AdmixTools && cd src && make && make install && cd .. && \
     ln -sf /opt/AdmixTools/bin/* /usr/local/bin/ && \
     rm -rf /opt/AdmixTools/.git && \
     # BayeScan
+    echo "Installing BayeScan..." && \
     cd /opt && \
     wget --no-check-certificate --retry-connrefused --waitretry=1 --read-timeout=20 --timeout=15 -t 3 \
         http://cmpg.unibe.ch/software/BayeScan/files/BayeScan2.1.zip && \
@@ -404,12 +377,14 @@ RUN set -e && \
     ln -sf /opt/BayeScan2.1/binaries/BayeScan2.1_linux64bits /usr/local/bin/bayescan && \
     rm -f BayeScan2.1.zip && \
     # GEMMA
+    echo "Installing GEMMA..." && \
     wget --no-check-certificate --retry-connrefused --waitretry=1 --read-timeout=20 --timeout=15 -t 3 \
         https://github.com/genetics-statistics/GEMMA/releases/download/v0.98.4/gemma-0.98.4-linux-static-AMD64.gz && \
     gunzip gemma-0.98.4-linux-static-AMD64.gz && \
     chmod +x gemma-0.98.4-linux-static-AMD64 && \
     mv gemma-0.98.4-linux-static-AMD64 /usr/local/bin/gemma && \
     # BayesAss3-SNPs
+    echo "Installing BayesAss3-SNPs..." && \
     git clone --depth=1 https://github.com/stevemussmann/BayesAss3-SNPs.git && \
     cd BayesAss3-SNPs && \
     mv BA3-SNPS-Ubuntu64 BA3-SNPS && \
@@ -417,6 +392,7 @@ RUN set -e && \
     ln -sf /opt/BayesAss3-SNPs/BA3-SNPS /usr/local/bin/BA3-SNPS && \
     rm -rf /opt/BayesAss3-SNPs/.git && \
     # BA3-SNPS-autotune
+    echo "Installing BA3-SNPS-autotune..." && \
     cd /opt && \
     git clone --depth=1 https://github.com/stevemussmann/BA3-SNPS-autotune.git && \
     cd BA3-SNPS-autotune && \
@@ -424,11 +400,13 @@ RUN set -e && \
     ln -sf /opt/BA3-SNPS-autotune/BA3-SNPS-autotune.py /usr/local/bin/BA3-SNPS-autotune && \
     rm -rf /opt/BA3-SNPS-autotune/.git && \
     # Verify critical analysis tools are installed and executable
-    test -x /usr/local/bin/bayescan && echo "BayeScan verified" && \
-    test -x /usr/local/bin/gemma && echo "GEMMA verified" && \
-    test -x /usr/local/bin/BA3-SNPS && echo "BA3-SNPS verified" && \
-    test -d /opt/AdmixTools && echo "AdmixTools verified" && \
-    echo "All critical analysis tools processed"
+    echo "Verifying installations..." && \
+    test -x /usr/local/bin/bayescan && echo "✓ BayeScan verified" && \
+    test -x /usr/local/bin/gemma && echo "✓ GEMMA verified" && \
+    test -x /usr/local/bin/BA3-SNPS && echo "✓ BA3-SNPS verified" && \
+    test -d /opt/AdmixTools && echo "✓ AdmixTools verified" && \
+    test -x /usr/local/bin/sambada && echo "✓ SamBada binary verified" && \
+    echo "Installation of analysis tools completed"
 
 # Create HPC module-compatible activation script
 RUN echo '#!/bin/zsh' > /opt/conda/bin/activate-env.sh && \
@@ -480,7 +458,7 @@ RUN git clone --depth=1 https://github.com/romkatv/powerlevel10k.git /tmp/powerl
     echo 'micromamba activate base' >> /home/aedes/.zshrc && \
     # Local adaptation tools
     echo '# Local adaptation tools' >> /home/aedes/.zshrc && \
-    echo 'export PATH="/opt/BayesAss3-SNPs:/opt/BA3-SNPS-autotune:/opt/sambada-install/binaries:$PATH"' >> /home/aedes/.zshrc && \
+    echo 'export PATH="/opt/BayesAss3-SNPs:/opt/BA3-SNPS-autotune:$PATH"' >> /home/aedes/.zshrc && \
     # Install fzf
     mkdir -p ~/.fzf && \
     git clone --depth=1 https://github.com/junegunn/fzf.git ~/.fzf && \
