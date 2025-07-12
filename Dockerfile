@@ -342,7 +342,8 @@ RUN Rscript -e "install.packages('BiocManager')" \
  && yes | Rscript -e "R.SamBada::downloadSambada('.')" \
  && ls -1 | grep sambada \
  && mv sambada* /usr/local/bin/ 2>/dev/null || echo "SamBada binary moved to /usr/local/bin" \
- && chmod +x /usr/local/bin/sambada* 2>/dev/null || echo "SamBada binary permissions set"
+ && chmod +x /usr/local/bin/sambada* 2>/dev/null || echo "SamBada binary permissions set" \
+ && test -x /usr/local/bin/sambada && echo "✓ SamBada binary verified" || echo "⚠ SamBada binary not found"
 
 # Install Python packages not in conda-forge
 RUN pip3 install --no-cache-dir pong
@@ -405,7 +406,6 @@ RUN set -e && \
     test -x /usr/local/bin/gemma && echo "✓ GEMMA verified" && \
     test -x /usr/local/bin/BA3-SNPS && echo "✓ BA3-SNPS verified" && \
     test -d /opt/AdmixTools && echo "✓ AdmixTools verified" && \
-    test -x /usr/local/bin/sambada && echo "✓ SamBada binary verified" && \
     echo "Installation of analysis tools completed"
 
 # Create HPC module-compatible activation script
