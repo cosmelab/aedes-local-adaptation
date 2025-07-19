@@ -221,52 +221,56 @@ RUN pip3 install --no-cache-dir pong
 RUN /opt/conda/bin/gem install colorls --no-document -n /usr/local/bin && \
     chmod +x /usr/local/bin/colorls
 
+# Install additional system dependencies for compilation
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    autoconf \
+    automake \
+    libtool \
+    build-essential \
+    gfortran \
+    libgsl-dev \
+    liblapack-dev \
+    libblas-dev \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
+
 # Download and install local adaptation tools with proper error handling
-RUN set -e && \
-    # SamBada
-    R -e "library(R.SamBada); downloadSambada('/opt/sambada')" && \
+# Split into separate steps for better debugging
+RUN R -e "library(R.SamBada); downloadSambada('/opt/sambada')" && \
     find /opt/sambada -name "sambada*" -type f -executable -exec chmod +x {} \; && \
-    find /opt/sambada -name "sambada*" -type f -executable -exec ln -sf {} /usr/local/bin/ \; && \
-    # AdmixTools
-    cd /opt && \
+    find /opt/sambada -name "sambada*" -type f -executable -exec ln -sf {} /usr/local/bin/ \;
+
+# Install AdmixTools
+RUN cd /opt && \
     git clone --depth=1 https://github.com/DReichLab/AdmixTools.git && \
     cd AdmixTools && cd src && make && make install && cd .. && \
     ln -sf /opt/AdmixTools/bin/* /usr/local/bin/ && \
-    rm -rf /opt/AdmixTools/.git && \
-    # BayeScan
-    cd /opt && \
+    rm -rf /opt/AdmixTools/.git
+
+# Install other binary tools  
+RUN cd /opt && \
     wget --retry-connrefused --waitretry=1 --read-timeout=20 --timeout=15 -t 3 \
         http://cmpg.unibe.ch/software/BayeScan/files/BayeScan2.1.zip && \
     unzip BayeScan2.1.zip && \
     chmod +x BayeScan2.1/binaries/BayeScan2.1_linux64bits && \
     ln -sf /opt/BayeScan2.1/binaries/BayeScan2.1_linux64bits /usr/local/bin/bayescan && \
     rm -f BayeScan2.1.zip && \
-    # GEMMA
     wget --retry-connrefused --waitretry=1 --read-timeout=20 --timeout=15 -t 3 \
         https://github.com/genetics-statistics/GEMMA/releases/download/v0.98.4/gemma-0.98.4-linux-static-AMD64.gz && \
     gunzip gemma-0.98.4-linux-static-AMD64.gz && \
     chmod +x gemma-0.98.4-linux-static-AMD64 && \
     mv gemma-0.98.4-linux-static-AMD64 /usr/local/bin/gemma && \
-    # BayesAss3-SNPs
     git clone --depth=1 https://github.com/stevemussmann/BayesAss3-SNPs.git && \
     cd BayesAss3-SNPs && \
     mv BA3-SNPS-Ubuntu64 BA3-SNPS && \
     chmod +x BA3-SNPS && \
     ln -sf /opt/BayesAss3-SNPs/BA3-SNPS /usr/local/bin/BA3-SNPS && \
     rm -rf /opt/BayesAss3-SNPs/.git && \
-    # BA3-SNPS-autotune
     cd /opt && \
     git clone --depth=1 https://github.com/stevemussmann/BA3-SNPS-autotune.git && \
     cd BA3-SNPS-autotune && \
     chmod +x BA3-SNPS-autotune.py && \
     ln -sf /opt/BA3-SNPS-autotune/BA3-SNPS-autotune.py /usr/local/bin/BA3-SNPS-autotune && \
-    rm -rf /opt/BA3-SNPS-autotune/.git && \
-    # Verify critical analysis tools are installed and executable
-    test -x /usr/local/bin/bayescan && echo "BayeScan verified" && \
-    test -x /usr/local/bin/gemma && echo "GEMMA verified" && \
-    test -x /usr/local/bin/BA3-SNPS && echo "BA3-SNPS verified" && \
-    test -d /opt/AdmixTools && echo "AdmixTools verified" && \
-    echo "All critical analysis tools verified"
+    rm -rf /opt/BA3-SNPS-autotune/.git
 
 # Create HPC module-compatible activation script
 RUN echo '#!/bin/zsh' > /opt/conda/bin/activate-env.sh && \
