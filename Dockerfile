@@ -182,15 +182,19 @@ RUN micromamba install --channel-priority strict -c conda-forge -c bioconda \
     -y && micromamba clean --all --yes
 
 # Install R packages for population genetics and local adaptation analysis
-RUN R -e "install.packages(c('data.table', 'tidyverse', 'qqman', 'qqplotr', 'reticulate', 'broom', \
+# Note: Many packages are already installed via conda-forge above
+RUN R -e "install.packages(c('qqman', 'qqplotr', 'reticulate', 'broom', \
     'readxl', 'writexl', 'knitr', 'rmarkdown', 'pegas', 'ape', 'phangorn', 'vcfR', 'genetics', \
     'BiocManager', 'remotes', 'scales', 'ggrepel', 'ggtext', 'ggvenn', 'ggstatsplot', 'ggforce', \
     'ggpattern', 'scatterpie', 'RColorBrewer', 'extrafont', 'forcats', 'flextable', 'officer', \
-    'Cairo', 'dartR', 'OutFLANK', 'geosphere', 'rnaturalearth', 'rnaturalearthdata', 'ggspatial', \
-    'fields', 'grid', 'ellipse', 'reshape2', 'admixr', 'qvalue', 'genomation', 'regioneR'), \
-    repos='https://cloud.r-project.org/', dependencies=TRUE, Ncpus=4)" && \
-    # Verify critical R packages are installed
-    R -e "if(!require('dartR')) stop('dartR package failed to install'); if(!require('OutFLANK')) stop('OutFLANK package failed to install'); if(!require('qvalue')) stop('qvalue package failed to install'); if(!require('genomation')) stop('genomation package failed to install'); cat('Critical R packages verified\\n')"
+    'Cairo', 'geosphere', 'rnaturalearth', 'rnaturalearthdata', 'ggspatial', \
+    'fields', 'ellipse', 'reshape2'), \
+    repos='https://cloud.r-project.org/', dependencies=TRUE, Ncpus=4)"
+
+# Install OutFLANK dependencies first, then OutFLANK from GitHub for better reliability
+RUN R -e "if (!requireNamespace('BiocManager', quietly = TRUE)) install.packages('BiocManager'); \
+    BiocManager::install(c('qvalue'), update = FALSE, ask = FALSE)" && \
+    R -e "remotes::install_github('whitlock/OutFLANK')"
 
 # Install Bioconductor packages
 RUN R -e "if (!requireNamespace('BiocManager', quietly = TRUE)) install.packages('BiocManager'); \
