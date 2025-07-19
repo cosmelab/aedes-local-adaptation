@@ -239,13 +239,14 @@ RUN R -e "library(R.SamBada); downloadSambada('/opt/sambada')" && \
     find /opt/sambada -name "sambada*" -type f -executable -exec chmod +x {} \; && \
     find /opt/sambada -name "sambada*" -type f -executable -exec ln -sf {} /usr/local/bin/ \;
 
-# Install AdmixTools with OpenBLAS linking fix
+# Install AdmixTools with OpenBLAS linking fix and function declaration patch
 RUN cd /opt && \
     git clone --depth=1 https://github.com/DReichLab/AdmixTools.git && \
     cd AdmixTools && cd src && \
     export LDFLAGS="-L/opt/conda/lib" && \
     export CFLAGS="-I/opt/conda/include" && \
     sed -i 's/-lopenblas/-lblas/g' Makefile && \
+    sed -i 's/void setgtime ();/void setgtime(double *time);/' qpgsubs.c && \
     make && make install && cd .. && \
     ln -sf /opt/AdmixTools/bin/* /usr/local/bin/ && \
     rm -rf /opt/AdmixTools/.git
