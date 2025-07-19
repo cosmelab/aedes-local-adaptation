@@ -273,7 +273,7 @@ echo ""
 
 # 11. R Bioconductor Packages (from Dockerfile)
 section "11. R Bioconductor Packages"
-test_r_package "VariantAnnotation"
+# test_r_package "VariantAnnotation" # Removed from Dockerfile
 test_r_package "SNPRelate"
 test_r_package "AnnotationDbi"
 test_r_package "biomaRt"

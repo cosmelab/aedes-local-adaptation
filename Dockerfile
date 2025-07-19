@@ -69,7 +69,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     hwloc \
     numactl \
     libv8-dev \
-    librsvg2-dev \
     libpoppler-cpp-dev \
     jags \
     cargo \
@@ -123,7 +122,7 @@ RUN micromamba install --channel-priority strict -c conda-forge -c bioconda \
     geoplot \
     -y && micromamba clean --all --yes && \
     # Verify critical packages are installed
-    python -c "import pysam; import allel; import cyvcf2; print('Critical Python packages verified')"
+    python3 -c "import pysam; import allel; import cyvcf2; print('Critical Python packages verified')"
 
 # Install genomics tools
 RUN micromamba install --channel-priority strict -c conda-forge -c bioconda \
@@ -175,9 +174,6 @@ RUN micromamba install --channel-priority strict -c conda-forge -c bioconda \
     r-networkd3 \
     r-tmap \
     r-v8 \
-    r-magick \
-    r-rsvg \
-    bioconductor-variantannotation \
     bioconductor-snprelate \
     bioconductor-annotationdbi \
     bioconductor-biomart \
