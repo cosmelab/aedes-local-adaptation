@@ -1,0 +1,18 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Update Peacock Color",
+      "type": "shell",
+      "command": "python",
+      "args": ["${workspaceFolder}/.vscode/set-peacock-color.py"],
+      "presentation": {
+        "reveal": "silent",
+        "close": true
+      },
+      "runOptions": {
+        "runOn": "folderOpen"
+      }
+    }
+  ]
+}

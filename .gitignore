@@ -1,0 +1,207 @@
+# Data files
+*.vcf
+*.vcf.gz
+*.bam
+*.sam
+*.fastq
+*.fastq.gz
+*.fq
+*.fq.gz
+
+# Large files
+*.bed
+*.bim
+*.fam
+*.ped
+*.map
+*.tped
+*.tfam
+
+# Results
+*.pdf
+*.png
+*.jpg
+*.jpeg
+*.svg
+
+# Temporary files
+*.tmp
+*.temp
+*.log
+.snakemake/
+*.swp
+*~
+
+# R files
+.Rhistory
+.RData
+.Rproj.user
+
+# Python files
+__pycache__/
+*.py[cod]
+*$py.class
+.ipynb_checkpoints/
+
+# System files
+.DS_Store
+Thumbs.db
+
+# Keep directory structure
+!.gitkeep
+
+# AI ASSISTANT: READ USER_RULES.md FIRST - FOLLOW FORMAT EXACTLY
+# WGS Analysis .gitignore
+
+# Large data files
+data/raw/**
+data/sra/**
+data/processed/*.bam
+data/processed/*.sam
+*.fastq
+*.fastq.gz
+*.fasta
+*.fa
+*.fq
+*.fq.gz
+
+# Reference files (large)
+data/references/*.fa
+data/references/*.fasta
+data/references/*.gtf
+data/references/*.gff
+data/references/*.fai
+data/references/*.dict
+data/references/*.amb
+data/references/*.ann
+data/references/*.bwt
+data/references/*.pac
+data/references/*.sa
+
+# VCF and variant files (large)
+*.vcf
+*.vcf.gz
+*.bcf
+*.bcf.gz
+*.gvcf
+*.gvcf.gz
+
+# BAM files and indices
+*.bam
+*.bai
+*.cram
+*.crai
+
+# Analysis outputs (keep summaries but not large files)
+results/sarek/**
+results/fetchngs/**
+results/analysis/**/*.vcf
+results/analysis/**/*.bam
+results/analysis/**/*.fasta
+logs/*.log
+logs/*.out
+logs/*.err
+logs/*.txt
+logs/main_test.log
+logs/gdal_test.log
+logs/container_test_summary.txt
+*.xlsx
+custom.config
+singularity_temp_cache/*
+
+
+# Nextflow work directory
+work/
+.nextflow.log*
+.nextflow.pid
+
+# R specific
+.Rhistory
+.RData
+.Ruserdata
+*.Rproj.user/
+.Rproj.user/
+*.log
+
+# Python specific
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+.venv/
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Jupyter
+.ipynb_checkpoints/
+*.ipynb_checkpoints
+
+# System files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Docker
+.docker/
+
+# Singularity containers
+*.sif
+
+# Configuration files should stay in repo
+# .prettierignore, .prettierrc, .dockerignore are tracked
+
+# Temporary files
+*.tmp
+*.temp
+*.swp
+*.swo
+*~
+
+# IDE files
+.vscode/settings.json
+.idea/
+
+# Conda environments
+*.conda
+*.env
+
+# SRA cache
+~/.ncbi/
+
+# MultiQC
+multiqc_data/
+
+# ANGSD files
+*.angsd
+*.thetas
+*.pest
+*.saf
+*.saf.pos
+*.saf.idx
+
+# PLINK files
+*.bed
+*.bim
+*.fam
+*.ped
+*.map
+
+# ADMIXTURE files
+*.Q
+*.P
+
+# Keep these files (important results)
+!results/analysis/figures/
+!results/analysis/tables/
+!data/metadata/
+!scripts/
+!*.md
+!*.Rmd
+!configs/
