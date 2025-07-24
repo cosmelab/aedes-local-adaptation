@@ -85,6 +85,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     jags \
     cargo \
     rustc \
+    libmpfr-dev \
     && apt-get clean && rm -rf /var/lib/apt/lists/* \
     && groupadd -r aedes && useradd -r -g aedes aedes \
     && mkdir -p /home/aedes && chown aedes:aedes /home/aedes
