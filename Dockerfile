@@ -212,6 +212,8 @@ RUN micromamba install --channel-priority strict -c conda-forge -c bioconda \
     bioconductor-biomart \
     bioconductor-biostrings \
     ruby=3.2.2 \
+    mpfr \
+    gmp \
     -y && micromamba clean --all --yes
 
 # Install R packages for population genetics and local adaptation analysis
