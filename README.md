@@ -159,6 +159,6 @@ aedes-local-adaptation/
 ## Additional Resources
 
 - [hpc_setup_guide.md](hpc_setup_guide.md) - Detailed HPC instructions
-- [package_requirements.md](package_requirements.md) - Complete tool list
+- [TOOLS.md](TOOLS.md) - Complete tool list with exact versions
 - [readme_hpc.md](readme_hpc.md) - HPC-specific README
 - Issues: [GitHub Issues](https://github.com/cosmelab/aedes-local-adaptation/issues)
