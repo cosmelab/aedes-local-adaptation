@@ -18,8 +18,10 @@ warning() { echo -e "${YELLOW}[⚠]${NC} $1"; }
 error() { echo -e "${RED}[✗]${NC} $1"; }
 section() { echo -e "${PURPLE}[SECTION]${NC} $1"; }
 
-# Script directory
+# Script directories
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
+LOGS_DIR="$PROJECT_DIR/logs"
 
 echo "🧬 Aedes Local Adaptation Container - Master Test Suite"
 echo "======================================================"
@@ -40,22 +42,22 @@ section "TEST 1: Main Bioinformatics Tools"
 echo "Running primary tool test suite..."
 echo ""
 
-if [ -f "$SCRIPT_DIR/test_container_tools.sh" ]; then
+if [ -f "$SCRIPT_DIR/test_tools/test_container_tools.sh" ]; then
     # Create logs directory if it doesn't exist
-    mkdir -p logs
+    mkdir -p "$LOGS_DIR"
 
     # Run main test and capture output
-    if bash "$SCRIPT_DIR/test_container_tools.sh" > logs/main_test.log 2>&1; then
+    if bash "$SCRIPT_DIR/test_tools/test_container_tools.sh" > "$LOGS_DIR/main_test.log" 2>&1; then
         success "Main tools test completed"
     else
         warning "Main tools test completed with warnings"
     fi
 
     # Parse results from main test
-    if [ -f logs/main_test.log ]; then
+    if [ -f "$LOGS_DIR/main_test.log" ]; then
         # Remove ANSI color codes before parsing
-        TOTAL_MAIN_TOOLS=$(grep "Total tools tested:" logs/main_test.log | sed 's/\x1b\[[0-9;]*m//g' | awk '{print $4}' 2>/dev/null || echo "0")
-        AVAILABLE_MAIN_TOOLS=$(grep "Available tools:" logs/main_test.log | sed 's/\x1b\[[0-9;]*m//g' | awk '{print $4}' 2>/dev/null || echo "0")
+        TOTAL_MAIN_TOOLS=$(grep "Total tools tested:" "$LOGS_DIR/main_test.log" | sed 's/\x1b\[[0-9;]*m//g' | awk '{print $4}' 2>/dev/null || echo "0")
+        AVAILABLE_MAIN_TOOLS=$(grep "Available tools:" "$LOGS_DIR/main_test.log" | sed 's/\x1b\[[0-9;]*m//g' | awk '{print $4}' 2>/dev/null || echo "0")
 
         # Ensure variables are numeric
         TOTAL_MAIN_TOOLS=${TOTAL_MAIN_TOOLS//[^0-9]/}
@@ -65,10 +67,10 @@ if [ -f "$SCRIPT_DIR/test_container_tools.sh" ]; then
 
         # Show summary from main test
         echo "Main tools summary:"
-        grep -E "(Total tools tested|Available tools|Missing tools|Success rate)" logs/main_test.log || echo "Could not parse main test results"
+        grep -E "(Total tools tested|Available tools|Missing tools|Success rate)" "$LOGS_DIR/main_test.log" || echo "Could not parse main test results"
     fi
 else
-    error "Main test script not found: $SCRIPT_DIR/test_container_tools.sh"
+    error "Main test script not found: $SCRIPT_DIR/test_tools/test_container_tools.sh"
 fi
 
 echo ""
@@ -80,19 +82,19 @@ section "TEST 2: GDAL and Geospatial Tools"
 echo "Running GDAL/geospatial tool test suite..."
 echo ""
 
-if [ -f "$SCRIPT_DIR/test_gdal_tools.sh" ]; then
+if [ -f "$SCRIPT_DIR/test_tools/test_gdal_tools.sh" ]; then
         # Run GDAL test and capture output
-    if bash "$SCRIPT_DIR/test_gdal_tools.sh" > /tmp/gdal_test.log 2>&1; then
+    if bash "$SCRIPT_DIR/test_tools/test_gdal_tools.sh" > "$LOGS_DIR/gdal_test.log" 2>&1; then
         success "GDAL tools test completed"
     else
         warning "GDAL tools test completed with warnings"
     fi
 
     # Parse results from GDAL test
-    if [ -f /tmp/gdal_test.log ]; then
+    if [ -f "$LOGS_DIR/gdal_test.log" ]; then
         # Remove ANSI color codes before parsing
-        TOTAL_GDAL_TOOLS=$(grep "Total tools tested:" /tmp/gdal_test.log | sed 's/\x1b\[[0-9;]*m//g' | awk '{print $4}' 2>/dev/null || echo "0")
-        AVAILABLE_GDAL_TOOLS=$(grep "Working tools:" /tmp/gdal_test.log | sed 's/\x1b\[[0-9;]*m//g' | awk '{print $4}' 2>/dev/null || echo "0")
+        TOTAL_GDAL_TOOLS=$(grep "Total tools tested:" "$LOGS_DIR/gdal_test.log" | sed 's/\x1b\[[0-9;]*m//g' | awk '{print $4}' 2>/dev/null || echo "0")
+        AVAILABLE_GDAL_TOOLS=$(grep "Working tools:" "$LOGS_DIR/gdal_test.log" | sed 's/\x1b\[[0-9;]*m//g' | awk '{print $4}' 2>/dev/null || echo "0")
 
         # Ensure variables are numeric
         TOTAL_GDAL_TOOLS=${TOTAL_GDAL_TOOLS//[^0-9]/}
@@ -101,8 +103,8 @@ if [ -f "$SCRIPT_DIR/test_gdal_tools.sh" ]; then
         AVAILABLE_GDAL_TOOLS=${AVAILABLE_GDAL_TOOLS:-0}
 
         # Handle segfaulting tools line which might not exist
-        if grep -q "Segfaulting tools:" /tmp/gdal_test.log; then
-            SEGFAULT_GDAL_TOOLS=$(grep "Segfaulting tools:" /tmp/gdal_test.log | awk '{print $3}' 2>/dev/null || echo "0")
+        if grep -q "Segfaulting tools:" "$LOGS_DIR/gdal_test.log"; then
+            SEGFAULT_GDAL_TOOLS=$(grep "Segfaulting tools:" "$LOGS_DIR/gdal_test.log" | awk '{print $3}' 2>/dev/null || echo "0")
             SEGFAULT_GDAL_TOOLS=${SEGFAULT_GDAL_TOOLS//[^0-9]/}
             SEGFAULT_GDAL_TOOLS=${SEGFAULT_GDAL_TOOLS:-0}
         else
@@ -111,10 +113,10 @@ if [ -f "$SCRIPT_DIR/test_gdal_tools.sh" ]; then
 
         # Show summary from GDAL test
         echo "GDAL tools summary:"
-        grep -E "(Total tools tested|Working tools|Segfaulting tools|Tools present)" /tmp/gdal_test.log || echo "Could not parse GDAL test results"
+        grep -E "(Total tools tested|Working tools|Segfaulting tools|Tools present)" "$LOGS_DIR/gdal_test.log" || echo "Could not parse GDAL test results"
     fi
 else
-    warning "GDAL test script not found: $SCRIPT_DIR/test_gdal_tools.sh"
+    warning "GDAL test script not found: $SCRIPT_DIR/test_tools/test_gdal_tools.sh"
     warning "Skipping GDAL tests (this is optional)"
 fi
 
@@ -186,11 +188,11 @@ echo "  - User: $(whoami)"
 
 echo ""
 info "📁 Log files generated:"
-if [ -f logs/main_test.log ]; then
-    echo "  - Main tools: logs/main_test.log"
+if [ -f "$LOGS_DIR/main_test.log" ]; then
+    echo "  - Main tools: $LOGS_DIR/main_test.log"
 fi
-if [ -f /tmp/gdal_test.log ]; then
-    echo "  - GDAL tools: /tmp/gdal_test.log"
+if [ -f "$LOGS_DIR/gdal_test.log" ]; then
+    echo "  - GDAL tools: $LOGS_DIR/gdal_test.log"
 fi
 
 echo ""
@@ -210,8 +212,8 @@ echo "  4. For GDAL issues: Expected due to library conflicts"
         echo "Success rate: $((AVAILABLE_ALL_TOOLS * 100 / TOTAL_ALL_TOOLS))%"
     fi
     echo "Status: $(if [ $MAIN_PERCENTAGE -ge 90 ]; then echo "READY"; elif [ $MAIN_PERCENTAGE -ge 75 ]; then echo "MOSTLY_READY"; else echo "ISSUES"; fi)"
-} > logs/container_test_summary.txt
+} > "$LOGS_DIR/container_test_summary.txt"
 
 echo ""
-success "📄 Summary saved to: logs/container_test_summary.txt"
+success "📄 Summary saved to: $LOGS_DIR/container_test_summary.txt"
 echo ""

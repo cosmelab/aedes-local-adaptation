@@ -107,9 +107,53 @@ echo ""
 
 # 2. PROJ Tools
 section "2. PROJ Tools"
-test_gdal_tool "PROJ" "proj" ""
-test_gdal_tool "CS2CS" "cs2cs" ""
-test_gdal_tool "PROJINFO" "projinfo" "--help"
+# PROJ tools need special handling - they don't have standard version flags
+# Test by piping valid input
+if command -v proj >/dev/null 2>&1; then
+    if echo "0 0" | proj +proj=utm +zone=33 +datum=WGS84 >/dev/null 2>&1; then
+        success "PROJ (proj)"
+        AVAILABLE_TOOLS=$((AVAILABLE_TOOLS + 1))
+    else
+        warning "PROJ (proj) - ERROR"
+        MISSING_TOOLS=$((MISSING_TOOLS + 1))
+    fi
+    TOTAL_TOOLS=$((TOTAL_TOOLS + 1))
+else
+    warning "PROJ (proj) - NOT FOUND"
+    MISSING_TOOLS=$((MISSING_TOOLS + 1))
+    TOTAL_TOOLS=$((TOTAL_TOOLS + 1))
+fi
+
+if command -v cs2cs >/dev/null 2>&1; then
+    if echo "0 0" | cs2cs +proj=latlong +datum=WGS84 +to +proj=latlong +datum=WGS84 >/dev/null 2>&1; then
+        success "CS2CS (cs2cs)"
+        AVAILABLE_TOOLS=$((AVAILABLE_TOOLS + 1))
+    else
+        warning "CS2CS (cs2cs) - ERROR"
+        MISSING_TOOLS=$((MISSING_TOOLS + 1))
+    fi
+    TOTAL_TOOLS=$((TOTAL_TOOLS + 1))
+else
+    warning "CS2CS (cs2cs) - NOT FOUND"
+    MISSING_TOOLS=$((MISSING_TOOLS + 1))
+    TOTAL_TOOLS=$((TOTAL_TOOLS + 1))
+fi
+
+# PROJINFO needs special handling too
+if command -v projinfo >/dev/null 2>&1; then
+    if projinfo EPSG:4326 >/dev/null 2>&1; then
+        success "PROJINFO (projinfo)"
+        AVAILABLE_TOOLS=$((AVAILABLE_TOOLS + 1))
+    else
+        warning "PROJINFO (projinfo) - ERROR"
+        MISSING_TOOLS=$((MISSING_TOOLS + 1))
+    fi
+    TOTAL_TOOLS=$((TOTAL_TOOLS + 1))
+else
+    warning "PROJINFO (projinfo) - NOT FOUND"
+    MISSING_TOOLS=$((MISSING_TOOLS + 1))
+    TOTAL_TOOLS=$((TOTAL_TOOLS + 1))
+fi
 echo ""
 
 # 3. Python GDAL Packages

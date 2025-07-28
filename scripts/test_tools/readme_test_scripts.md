@@ -1,6 +1,6 @@
 # Container Testing Scripts
 
-This directory contains comprehensive testing scripts for validating the Aedes Local Adaptation bioinformatics container.
+This directory (`scripts/test_tools/`) contains comprehensive testing scripts for validating the Aedes Local Adaptation bioinformatics container.
 
 ## Overview
 
@@ -23,7 +23,11 @@ The container includes 100+ bioinformatics tools and packages. These scripts sys
 
 **Usage**:
 ```bash
-bash scripts/test_container_tools.sh
+# From project root:
+bash scripts/test_all_tools.sh
+
+# Or run individual test:
+bash scripts/test_tools/test_container_tools.sh
 ```
 
 ### 2. `test_gdal_tools.sh`
@@ -42,21 +46,28 @@ bash scripts/test_container_tools.sh
 
 **Usage**:
 ```bash
-bash scripts/test_gdal_tools.sh
+# From project root:
+bash scripts/test_all_tools.sh
+
+# Or run individual test:
+bash scripts/test_tools/test_gdal_tools.sh
 ```
 
-### 3. `test_all_tools.sh`
-**Purpose**: Master wrapper script that runs all tests and provides comprehensive summary
+### 3. `test_all_tools.sh` (Main Script)
+**Purpose**: Master wrapper script located in `scripts/` that runs all tests and provides comprehensive summary
+
+**Location**: `scripts/test_all_tools.sh` (main directory)
 
 **Features**:
-- Runs both main and GDAL test suites
+- Runs both main and GDAL test suites from the test_tools directory
 - Aggregates results from all tests
 - Provides overall container readiness assessment
-- Generates summary files for documentation
+- Generates summary files in the main logs directory
 - Color-coded status reporting
 
 **Usage**:
 ```bash
+# This is the main entry point - run from project root:
 bash scripts/test_all_tools.sh
 ```
 
@@ -102,9 +113,11 @@ bash scripts/test_all_tools.sh
 - **Missing optional packages**: Some specialized packages may not be available but don't affect core functionality.
 
 ### Output Files
-- `/tmp/main_test.log`: Detailed results from main tool testing
-- `/tmp/gdal_test.log`: Detailed results from GDAL tool testing
-- `/tmp/container_test_summary.txt`: Concise summary of all tests
+- `logs/main_test.log`: Detailed results from main tool testing
+- `logs/gdal_test.log`: Detailed results from GDAL tool testing
+- `logs/container_test_summary.txt`: Concise summary of all tests
+
+Note: All log files are saved to the main `logs/` directory in the project root, not in the scripts directory.
 
 ## Troubleshooting
 
@@ -130,7 +143,7 @@ If you encounter issues:
 1. Check the container build logs in GitHub Actions
 2. Review the Dockerfile for expected tool installations
 3. Run individual test scripts to isolate problems
-4. Check `/tmp/*.log` files for detailed error messages
+4. Check `logs/*.log` files for detailed error messages
 
 ## Container Validation Workflow
 
