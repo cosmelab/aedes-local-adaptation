@@ -1,0 +1,62 @@
+Category,Tool,Version,Description
+Core,Python,3.11.7,Primary scripting and data analysis
+Core,R,4.3.3,Statistical computing and population genetics
+Core,Bash,5.2.15,Shell scripting and pipeline automation
+Core,Java,21.0.2-internal,Runtime for bioinformatics tools
+Core,Ruby,Available,Utility scripts and gems
+Genomics,samtools,Available,SAM/BAM file manipulation and analysis
+Genomics,bcftools,Available,VCF/BCF file manipulation and analysis
+Genomics,vcftools,Available,VCF file analysis and filtering
+Genomics,bedtools,Available,Genomic interval manipulation
+Genomics,plink,Available,Population genetics analysis
+Genomics,plink2,Available,Next-generation PLINK
+Genomics,bwa,Available,Short read alignment
+Genomics,angsd,Available,NGS data analysis
+Genomics,tabix,Available,Genomic file indexing
+Genomics,iqtree,Available,Phylogenetic inference
+Population Genetics,ADMIXTURE,Available,Population structure analysis
+Population Genetics,BayeScan,2.1,FST outlier detection
+Population Genetics,GEMMA,Available,Genome-wide association studies
+Population Genetics,sambada,0.8.0,Landscape genomics analysis
+Population Genetics,BA3-SNPS,3.0.4,Bayesian migration rate estimation
+Python,numpy,1.26.4,Numerical computing foundation
+Python,pandas,2.3.1,Data manipulation and analysis
+Python,scipy,1.16.0,Scientific computing library
+Python,matplotlib,3.10.3,Plotting and visualization
+Python,seaborn,0.13.2,Statistical data visualization
+Python,scikit-learn,1.7.1,Machine learning library
+Python,scikit-allel,1.3.13,Population genetics analysis
+Python,cyvcf2,0.31.0,Fast VCF file processing
+Python,pysam,0.22.1,SAM/BAM file interface
+Python,biopython,1.85,Biological computation
+Python,geopandas,1.1.1,Geospatial data analysis
+Python,rasterio,1.3.10,Raster data I/O
+Python,plotly,6.2.0,Interactive visualization
+Python,networkx,2.8.8,Network analysis
+R Core,tidyverse,2.0.0,Data science meta-package
+R Core,data.table,1.17.8,High-performance data manipulation
+R Core,ggplot2,3.5.2,Grammar of graphics plotting
+R Core,dplyr,1.1.4,Data manipulation verbs
+R Core,devtools,2.4.5,Package development tools
+R Core,remotes,2.5.0,Package installation from remote repositories
+R Population Genetics,adegenet,2.1.11,Exploratory analysis of genetic data
+R Population Genetics,vcfR,1.15.0,VCF file manipulation in R
+R Population Genetics,SNPRelate,1.36.0,Parallel computing for SNP data
+R Population Genetics,LEA,3.19.8,Landscape and ecological association studies
+R Population Genetics,lfmm,1.0,Latent factor mixed models
+R Population Genetics,OutFLANK,0.2,FST outlier detection
+R Population Genetics,pcadapt,4.4.0,Principal component analysis for population genetics
+R Population Genetics,lostruct,0.0.0.9000,Local PCA for population structure
+R Population Genetics,admixtools,2.0.10,ADMIXTOOLS wrapper for R
+R Population Genetics,admixr,0.10.0,ADMIXTOOLS analysis in R
+R Geospatial,sf,1.0.16,Simple features for spatial data
+R Geospatial,raster,3.6.32,Raster data analysis
+R Geospatial,terra,1.8.60,Spatial data analysis
+R Geospatial,leaflet,2.2.2,Interactive web maps
+R Geospatial,tmap,3.3.4,Thematic maps
+R Geospatial,ggstatsplot,0.13.1,Statistical plots with ggplot2
+R Geospatial,plotly,4.11.0,Interactive web graphics
+System,Operating System,Debian GNU/Linux 12 (bookworm),Container base OS
+System,Kernel,4.18.0-477.27.1.el8_8.x86_64,Linux kernel version
+System,Architecture,x86_64,System architecture
+System,Container Engine,micromamba 1.5.0,Package manager
