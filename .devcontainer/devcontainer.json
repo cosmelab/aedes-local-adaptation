@@ -1,8 +1,8 @@
 {
-  "name": "RNA-seq Diapause Analysis",
-  "image": "diapause-rnaseq:latest",
+  "name": "Aedes Local Adaptation Analysis",
+  "image": "cosmelab/aedes-local-adaptation:latest",
  // "dockerComposeFile": "../docker-compose.yml",
- // "service": "rnaseq-analysis",
+ // "service": "aedes-local-adaptation",
   "workspaceFolder": "/proj",
   "shutdownAction": "stopCompose",
   

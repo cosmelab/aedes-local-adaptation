@@ -75,7 +75,8 @@ get_r_version() {
 clean_version() {
     local version="$1"
     # Remove newlines, extra spaces, quotes, and limit length
-    echo "$version" | tr -d '\n\r' | tr -s ' ' | sed 's/^["\x27]*//;s/["\x27]*$//' | head -c 30
+    # Also remove "Available" if it's concatenated with version
+    echo "$version" | tr -d '\n\r' | tr -s ' ' | sed 's/^["\x27]*//;s/["\x27]*$//' | sed 's/Available$//' | head -c 30
 }
 
 info "Generating comprehensive tool version report..."
@@ -119,11 +120,11 @@ info "Collecting core environment versions..."
 
 # Add to CSV
 {
-    echo "Core,Python,$(python3 --version 2>&1 | cut -d' ' -f2),Primary scripting and data analysis"
-    echo "Core,R,$(R --version 2>&1 | head -1 | grep -o 'R version [0-9.]*' | cut -d' ' -f3),Statistical computing and population genetics"
-    echo "Core,Bash,$(bash --version | head -1 | grep -o 'version [0-9.][0-9.]*' | cut -d' ' -f2),Shell scripting and pipeline automation"
-    echo "Core,Java,$(get_version java 'java -version 2>&1 | head -1' | sed 's/.*version "\([^"]*\)".*/\1/'),Runtime for bioinformatics tools"
-    echo "Core,Ruby,$(get_version ruby 'ruby --version | cut -d\" \" -f2'),Utility scripts and gems"
+    echo "Core,Python,$(clean_version "$(python3 --version 2>&1 | cut -d' ' -f2)"),Primary scripting and data analysis"
+    echo "Core,R,$(clean_version "$(R --version 2>&1 | head -1 | grep -o 'R version [0-9.]*' | cut -d' ' -f3)"),Statistical computing and population genetics"
+    echo "Core,Bash,$(clean_version "$(bash --version | head -1 | grep -o 'version [0-9.][0-9.]*' | cut -d' ' -f2)"),Shell scripting and pipeline automation"
+    echo "Core,Java,$(clean_version "$(java -version 2>&1 | head -1 | sed 's/.*version "\([^"]*\)".*/\1/' || echo 'Available')"),Runtime for bioinformatics tools"
+    echo "Core,Ruby,$(clean_version "$(ruby --version 2>/dev/null | cut -d' ' -f2 || echo 'Available')"),Utility scripts and gems"
 } >> "$CSV_FILE"
 
 # Genomics tools
@@ -138,29 +139,29 @@ EOF
 
 {
     echo "| samtools | $(clean_version "$(samtools --version 2>/dev/null | head -1 | cut -d' ' -f2 || echo 'Available')") | SAM/BAM file manipulation and analysis |"
-    echo "| bcftools | $(clean_version "$(bcftools --version 2>/dev/null | head -1 | cut -d' ' -f2 || echo 'Available')") | VCF/BCF file manipulation and analysis |"
+    echo "| bcftools | $(clean_version "$(timeout 3 bcftools --version 2>/dev/null | head -1 | cut -d' ' -f2 || echo 'Library issue')") | VCF/BCF file manipulation and analysis |"
     echo "| vcftools | $(clean_version "$(vcftools --version 2>&1 | grep VCFtools | cut -d' ' -f2 || echo 'Available')") | VCF file analysis and filtering |"
     echo "| bedtools | $(clean_version "$(bedtools --version 2>/dev/null | cut -d' ' -f2 || echo 'Available')") | Genomic interval manipulation |"
     echo "| plink | $(clean_version "$(plink --version 2>&1 | head -1 | grep -o 'v[0-9.]*' | cut -c2- || echo 'Available')") | Population genetics analysis |"
     echo "| plink2 | $(clean_version "$(plink2 --version 2>&1 | head -1 | grep -o 'v[0-9.]*' | cut -c2- || echo 'Available')") | Next-generation PLINK |"
-    echo "| bwa | $(clean_version "$(bwa 2>&1 | grep Version | cut -d':' -f2 || echo 'Available')") | Short read alignment |"
+    echo "| bwa | $(clean_version "$(bash -c 'bwa' 2>&1 | grep Version | cut -d' ' -f2 || echo 'Available')") | Short read alignment |"
     echo "| angsd | $(clean_version "$(angsd -h 2>&1 | head -1 | grep -o '[0-9.]*' | head -1 || echo 'Available')") | NGS data analysis |"
-    echo "| tabix | $(clean_version "$(tabix 2>&1 | head -1 | grep -o '[0-9.]*' | head -1 || echo 'Available')") | Genomic file indexing |"
+    echo "| tabix | $(clean_version "$(tabix --help 2>&1 | grep Version | cut -d' ' -f2 || echo 'Available')") | Genomic file indexing |"
     echo "| iqtree | $(clean_version "$(iqtree --version 2>&1 | head -1 | grep -o '[0-9.]*' | head -1 || echo 'Available')") | Phylogenetic inference |"
 } >> "$REPORT_FILE"
 
 # Add genomics tools to CSV
 {
-    echo "Genomics,samtools,$(get_version samtools 'samtools --version | head -1 | cut -d\" \" -f2'),SAM/BAM file manipulation and analysis"
-    echo "Genomics,bcftools,$(get_version bcftools 'bcftools --version | head -1 | cut -d\" \" -f2'),VCF/BCF file manipulation and analysis"
-    echo "Genomics,vcftools,$(get_version vcftools 'vcftools --version 2>&1 | grep VCFtools | cut -d\" \" -f2'),VCF file analysis and filtering"
-    echo "Genomics,bedtools,$(get_version bedtools 'bedtools --version | cut -d\" \" -f2'),Genomic interval manipulation"
-    echo "Genomics,plink,$(get_version plink 'plink --version | head -1 | grep -o \"v[0-9.]*\" | cut -c2-'),Population genetics analysis"
-    echo "Genomics,plink2,$(get_version plink2 'plink2 --version | head -1 | grep -o \"v[0-9.]*\" | cut -c2-'),Next-generation PLINK"
-    echo "Genomics,bwa,$(get_version bwa 'bwa 2>&1 | grep Version | cut -d\" \" -f2'),Short read alignment"
-    echo "Genomics,angsd,$(get_version angsd 'angsd -h 2>&1 | head -1 | grep -o \"[0-9.]*\"'),NGS data analysis"
-    echo "Genomics,tabix,$(get_version tabix 'tabix 2>&1 | head -1 | grep -o \"[0-9.]*\"'),Genomic file indexing"
-    echo "Genomics,iqtree,$(get_version iqtree 'iqtree --version 2>&1 | head -1 | grep -o \"[0-9.]*\"'),Phylogenetic inference"
+    echo "Genomics,samtools,$(clean_version "$(samtools --version 2>/dev/null | head -1 | cut -d' ' -f2 || echo 'Available')"),SAM/BAM file manipulation and analysis"
+    echo "Genomics,bcftools,$(clean_version "$(timeout 3 bcftools --version 2>/dev/null | head -1 | cut -d' ' -f2 || echo 'Library issue')"),VCF/BCF file manipulation and analysis"
+    echo "Genomics,vcftools,$(clean_version "$(vcftools --version 2>&1 | grep VCFtools | cut -d' ' -f2 || echo 'Available')"),VCF file analysis and filtering"
+    echo "Genomics,bedtools,$(clean_version "$(bedtools --version 2>/dev/null | cut -d' ' -f2 || echo 'Available')"),Genomic interval manipulation"
+    echo "Genomics,plink,$(clean_version "$(plink --version 2>&1 | head -1 | grep -o 'v[0-9.]*' | cut -c2- || echo 'Available')"),Population genetics analysis"
+    echo "Genomics,plink2,$(clean_version "$(plink2 --version 2>&1 | head -1 | grep -o 'v[0-9.]*' | cut -c2- || echo 'Available')"),Next-generation PLINK"
+    echo "Genomics,bwa,$(clean_version "$(bash -c 'bwa' 2>&1 | grep Version | cut -d' ' -f2 || echo 'Available')"),Short read alignment"
+    echo "Genomics,angsd,$(clean_version "$(angsd -h 2>&1 | head -1 | grep -o '[0-9.]*' | head -1 || echo 'Available')"),NGS data analysis"
+    echo "Genomics,tabix,$(clean_version "$(tabix --help 2>&1 | grep Version | cut -d' ' -f2 || echo 'Available')"),Genomic file indexing"
+    echo "Genomics,iqtree,$(clean_version "$(iqtree --version 2>&1 | head -1 | grep -o '[0-9.]*' | head -1 || echo 'Available')"),Phylogenetic inference"
 } >> "$CSV_FILE"
 
 # Population genetics and local adaptation tools
@@ -182,11 +183,11 @@ EOF
 } >> "$REPORT_FILE"
 
 {
-    echo "Population Genetics,ADMIXTURE,$(get_version admixture 'admixture --help 2>&1 | head -1 | grep -o \"[0-9.]*\"'),Population structure analysis"
-    echo "Population Genetics,BayeScan,2.1,FST outlier detection"
-    echo "Population Genetics,GEMMA,$(get_version gemma 'gemma -h 2>&1 | head -1 | grep -o \"[0-9.]*\"'),Genome-wide association studies"
-    echo "Population Genetics,sambada,0.8.0,Landscape genomics analysis"
-    echo "Population Genetics,BA3-SNPS,3.0.4,Bayesian migration rate estimation"
+    echo "Population Genetics,ADMIXTURE,$(clean_version "$(admixture --help 2>&1 | head -1 | grep -o '[0-9.]*' || echo 'Available')"),Population structure analysis"
+    echo "Population Genetics,BayeScan,$(clean_version "2.1"),FST outlier detection"
+    echo "Population Genetics,GEMMA,$(clean_version "$(gemma -h 2>&1 | head -1 | grep -o '[0-9.]*' || echo 'Available')"),Genome-wide association studies"
+    echo "Population Genetics,sambada,$(clean_version "0.8.0"),Landscape genomics analysis"
+    echo "Population Genetics,BA3-SNPS,$(clean_version "3.0.4"),Bayesian migration rate estimation"
 } >> "$CSV_FILE"
 
 # Python packages

@@ -3,7 +3,7 @@
 This document provides a comprehensive inventory of all bioinformatics tools, software packages, and computational environments used in the Aedes aegypti local adaptation analysis pipeline. This information is essential for reproducibility and can be referenced in publications.
 
 **Container Information:**
-- Generated on: 2025-07-28 15:27:37 UTC
+- Generated on: 2025-07-28 15:47:33 UTC
 - Container: Aedes Local Adaptation Analysis
 - Base OS: Ubuntu (via micromamba)
 - Architecture: AMD64/x86_64
@@ -25,14 +25,14 @@ This document provides a comprehensive inventory of all bioinformatics tools, so
 | Tool | Version | Description |
 |------|---------|-------------|
 | samtools | 1.22 | SAM/BAM file manipulation and analysis |
-| bcftools | Available | VCF/BCF file manipulation and analysis |
+| bcftools | Library issue | VCF/BCF file manipulation and analysis |
 | vcftools | (0.1.17) | VCF file analysis and filtering |
 | bedtools | v2.31.1 | Genomic interval manipulation |
 | plink | 1.9.0 | Population genetics analysis |
 | plink2 | 2.0.0 | Next-generation PLINK |
-| bwa |  0.7.19-r1273Available | Short read alignment |
+| bwa | 0.7.19-r1273 | Short read alignment |
 | angsd | 0.940 | NGS data analysis |
-| tabix | Available | Genomic file indexing |
+| tabix | 1.22 | Genomic file indexing |
 | iqtree | 3.0.1 | Phylogenetic inference |
 
 ## Population Genetics and Local Adaptation Tools
