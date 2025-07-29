@@ -104,7 +104,12 @@ singularity exec aedes-local-adaptation.sif plink2 --version
 ```bash
 # Test all 50+ tools comprehensively
 singularity shell --cleanenv --bind $PWD:/proj aedes-local-adaptation.sif
-cd /proj && bash scripts/test_all_tools.sh
+
+# Navigate to project (use zsh for colors and auto-complete)
+cd /proj && zsh
+
+# Run tests
+bash scripts/test_all_tools.sh
 ```
 
 **🎯 The test script validates all tools including:**
@@ -126,9 +131,10 @@ srun --partition=general --cpus-per-task=4 --mem=8G --time=2:00:00 --pty bash
 # Enter container
 singularity shell --cleanenv --bind $PWD:/proj aedes-local-adaptation.sif
 
-# Activate micromamba environment
-eval "$(micromamba shell hook --shell bash)"
-micromamba activate base
+# Navigate to project and use zsh for colorful terminal
+cd /proj && zsh
+
+# Micromamba is already configured in zsh environment
 ```
 
 ### Verify Environment
