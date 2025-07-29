@@ -176,6 +176,7 @@ EOF
 
 {
     echo "| ADMIXTURE | $(clean_version "$(admixture --help 2>&1 | head -1 | grep -o '[0-9.]*' || echo 'Available')") | Population structure analysis |"
+    echo "| fastStructure | $(clean_version "$(fastStructure --help 2>&1 | grep -i version | grep -o '[0-9.]*' || echo '3.0 (env)')") | Population structure inference |"
     echo "| BayeScan | $(clean_version "2.1") | FST outlier detection |"
     echo "| GEMMA | $(clean_version "$(gemma -h 2>&1 | head -1 | grep -o '[0-9.]*' || echo 'Available')") | Genome-wide association studies |"
     echo "| sambada | $(clean_version "0.8.0") | Landscape genomics analysis |"
@@ -184,6 +185,7 @@ EOF
 
 {
     echo "Population Genetics,ADMIXTURE,$(clean_version "$(admixture --help 2>&1 | head -1 | grep -o '[0-9.]*' || echo 'Available')"),Population structure analysis"
+    echo "Population Genetics,fastStructure,$(clean_version "$(fastStructure --help 2>&1 | grep -i version | grep -o '[0-9.]*' || echo '3.0 (env)')"),Population structure inference"
     echo "Population Genetics,BayeScan,$(clean_version "2.1"),FST outlier detection"
     echo "Population Genetics,GEMMA,$(clean_version "$(gemma -h 2>&1 | head -1 | grep -o '[0-9.]*' || echo 'Available')"),Genome-wide association studies"
     echo "Population Genetics,sambada,$(clean_version "0.8.0"),Landscape genomics analysis"
