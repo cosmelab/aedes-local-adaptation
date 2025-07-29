@@ -4,10 +4,10 @@
 
 ![HPC](https://img.shields.io/badge/HPC-Singularity%20%7C%20SLURM-red?style=for-the-badge&logo=linux)
 ![Architecture](https://img.shields.io/badge/Architecture-AMD64%20HPC-blue?style=for-the-badge&logo=amd)
-![Container](https://img.shields.io/badge/Container-~3GB-orange?style=for-the-badge&logo=docker)
+![Container](https://img.shields.io/badge/Container-3.7GB-orange?style=for-the-badge&logo=docker)
 ![Package Manager](https://img.shields.io/badge/Package%20Manager-micromamba-green?style=for-the-badge&logo=anaconda)
 
-**🚀 Quick reference for running Aedes Local Adaptation analysis on HPC systems**
+**🚀 Complete guide for running Aedes Local Adaptation analysis on HPC systems**
 
 *Optimized for SLURM-based HPC clusters with Singularity/Apptainer*
 
@@ -31,7 +31,7 @@
 # Load Singularity module (if required)
 module load singularity-ce/3.9.3
 
-# Download from GHCR
+# Download from GHCR (recommended)
 singularity pull aedes-local-adaptation.sif \
     docker://ghcr.io/cosmelab/aedes-local-adaptation:latest
 ```
@@ -53,7 +53,38 @@ singularity pull aedes-local-adaptation.sif \
 </tr>
 </table>
 
-**💡 Both registries work identically - choose based on your preference**
+### 💾 **Cache Management First! (Critical for HPC)**
+
+**⚠️ IMPORTANT:** Before pulling containers, set up proper cache management to avoid quota issues:
+
+```bash
+# Check your quota status
+check_quota home
+check_quota bigdata
+
+# Set up temporary cache (choose one method):
+
+# Method 1: Use current directory (recommended)
+mkdir -p ./singularity_temp_cache
+export SINGULARITY_CACHEDIR=$PWD/singularity_temp_cache
+
+# Method 2: Use scratch space (if available)
+export SINGULARITY_CACHEDIR=/scratch/$USER/.singularity_cache
+mkdir -p "$SINGULARITY_CACHEDIR"
+
+# Pull container
+singularity pull aedes-local-adaptation.sif docker://ghcr.io/cosmelab/aedes-local-adaptation:latest
+
+# Clean up afterward
+rm -rf ./singularity_temp_cache
+unset SINGULARITY_CACHEDIR
+```
+
+**Emergency quota cleanup:**
+```bash
+# If you're over quota and can't pull containers:
+rm -rf ~/.singularity/cache
+```
 
 </details>
 
@@ -69,39 +100,16 @@ singularity exec aedes-local-adaptation.sif micromamba --version
 singularity exec aedes-local-adaptation.sif plink2 --version
 ```
 
-### 💾 **Cache Management First!**
-
-**⚠️ IMPORTANT:** Before pulling containers, set up proper cache management to avoid quota issues:
-
-```zsh
-# Check your quota status
-check_quota home
-check_quota bigdata
-
-# Set up temporary cache (choose one method):
-
-# Method 1: Use current directory (recommended)
-mkdir -p ./singularity_temp_cache
-export SINGULARITY_CACHEDIR=$PWD/singularity_temp_cache
-
-# Method 2: Use scratch space (if available)
-export SINGULARITY_CACHEDIR=/scratch/$USER/.singularity_cache
-mkdir -p "$SINGULARITY_CACHEDIR"
-
-# Method 3: Emergency cleanup (if over quota)
-rm -rf ~/.singularity/cache
-```
-
 ### Comprehensive Tool Test
 ```bash
-# Test all 40+ tools comprehensively
+# Test all 50+ tools comprehensively
 singularity shell --cleanenv --bind $PWD:/proj aedes-local-adaptation.sif
-cd /proj && zsh scripts/test_container_tools.sh
+cd /proj && bash scripts/test_all_tools.sh
 ```
 
 **🎯 The test script validates all tools including:**
 - Python packages (numpy, pandas, scikit-allel, geopandas)
-- R packages (adegenet, pcadapt, OutFLANK, R.SamBada)
+- R packages (adegenet, pcadapt, OutFLANK, lostruct)
 - Bioinformatics tools (PLINK, bcftools, ADMIXTURE)
 - Local adaptation tools (BayeScan, GEMMA, AdmixTools)
 
@@ -178,12 +186,12 @@ singularity exec \
     ${CONTAINER} \
     Rscript /proj/scripts/analysis/pcadapt_analysis.R
 
-# Run R.SamBada analysis
+# Run lostruct (local PCA) analysis
 singularity exec \
     --cleanenv \
     --bind ${PROJECT_DIR}:/proj \
     ${CONTAINER} \
-    Rscript /proj/scripts/analysis/sambada_analysis.R
+    Rscript /proj/scripts/analysis/lostruct_analysis.R
 
 echo "Local adaptation analysis completed: $(date)"
 ```
@@ -314,7 +322,7 @@ cd /proj
 
 # Create analysis directories (done by setup.sh)
 mkdir -p data/{raw,processed,metadata}
-mkdir -p output/{populations,local_adaptation,structure}
+mkdir -p results/{populations,local_adaptation,structure}
 mkdir -p scripts/{analysis,visualization}
 mkdir -p logs
 
@@ -384,12 +392,12 @@ singularity exec \
     aedes-local-adaptation.sif \
     Rscript scripts/analysis/pcadapt_analysis.R
 
-# Run R.SamBada
+# Run lostruct (local PCA)
 singularity exec \
     --cleanenv \
     --bind $PWD:/proj \
     aedes-local-adaptation.sif \
-    Rscript scripts/analysis/sambada_analysis.R
+    Rscript scripts/analysis/lostruct_analysis.R
 ```
 
 </details>
@@ -486,7 +494,7 @@ singularity exec \
 
 **🐳 Container**
 <br>
-`~3GB`
+`~3.7GB`
 
 </td>
 <td align="center" width="20%">
@@ -639,6 +647,36 @@ singularity exec \
 
 ---
 
+## 🔧 **Performance Optimization**
+
+<details>
+<summary><b>⚙️ HPC-Specific Settings</b> (Click to expand)</summary>
+
+### Thread Control
+```bash
+# Set optimal thread counts (in your job script)
+export OMP_NUM_THREADS=$SLURM_CPUS_PER_TASK
+export MKL_NUM_THREADS=$SLURM_CPUS_PER_TASK
+export OPENBLAS_NUM_THREADS=$SLURM_CPUS_PER_TASK
+
+# Use fast local storage for temporary files
+export TMPDIR=/tmp/$USER
+mkdir -p $TMPDIR
+```
+
+### Container Optimization
+```bash
+# Use --cleanenv for reproducible environments
+singularity exec --cleanenv --bind $PWD:/proj aedes-local-adaptation.sif command
+
+# For GPU nodes (if available)
+singularity exec --nv --bind $PWD:/proj aedes-local-adaptation.sif command
+```
+
+</details>
+
+---
+
 ## 🛠️ **Troubleshooting**
 
 <details>
@@ -667,7 +705,11 @@ singularity exec \
 </tr>
 <tr>
 <td><b>Tool not found</b></td>
-<td>Run <code>zsh scripts/test_container_tools.sh</code> to verify installation.</td>
+<td>Run <code>bash scripts/test_all_tools.sh</code> to verify installation.</td>
+</tr>
+<tr>
+<td><b>Quota exceeded</b></td>
+<td>Clean up <code>~/.singularity/cache</code> and use temporary cache directories.</td>
 </tr>
 </table>
 
@@ -684,7 +726,7 @@ singularity exec aedes-local-adaptation.sif env | grep -E "(PATH|CONDA|MAMBA)"
 singularity exec aedes-local-adaptation.sif micromamba list
 
 # Check tool availability
-singularity exec aedes-local-adaptation.sif zsh scripts/test_container_tools.sh
+singularity exec aedes-local-adaptation.sif bash scripts/test_all_tools.sh
 
 # Verify R packages
 singularity exec aedes-local-adaptation.sif Rscript -e "installed.packages()[,1]"
@@ -725,8 +767,6 @@ singularity exec aedes-local-adaptation.sif python3 -c "import pkg_resources; [p
 </tr>
 </table>
 
-**💡 Both registries work identically - choose based on your preference**
-
 </details>
 
 <details>
@@ -738,8 +778,8 @@ singularity exec aedes-local-adaptation.sif python3 -c "import pkg_resources; [p
 
 **📖 Project Documentation**
 - [Main README](README.md)
-- [Package Requirements](package_requirements.md)
-- [Setup Guide](setup.sh)
+- [Tool Versions](TOOLS.md)
+- [Test Scripts](scripts/test_all_tools.sh)
 
 </td>
 <td width="33%">
@@ -747,7 +787,7 @@ singularity exec aedes-local-adaptation.sif python3 -c "import pkg_resources; [p
 **🐳 Container Resources**
 - [GitHub Container Registry](https://ghcr.io/cosmelab/aedes-local-adaptation)
 - [Docker Hub](https://hub.docker.com/r/cosmelab/aedes-local-adaptation)
-- [Tool Testing Script](scripts/test_container_tools.sh)
+- [Tool Testing Script](scripts/test_all_tools.sh)
 
 </td>
 <td width="33%">
@@ -775,7 +815,7 @@ singularity exec aedes-local-adaptation.sif python3 -c "import pkg_resources; [p
 
 **🐳 Container Size**
 <br>
-`~3GB`
+`~3.7GB`
 
 </td>
 <td align="center" width="25%">
@@ -789,7 +829,7 @@ singularity exec aedes-local-adaptation.sif python3 -c "import pkg_resources; [p
 
 **🔧 Tools Available**
 <br>
-`40+`
+`50+`
 
 </td>
 <td align="center" width="25%">
@@ -802,8 +842,6 @@ singularity exec aedes-local-adaptation.sif python3 -c "import pkg_resources; [p
 </tr>
 </table>
 
-*For comprehensive tool testing, run: `zsh scripts/test_container_tools.sh`*
+*For comprehensive tool testing, run: `bash scripts/test_all_tools.sh`*
 
 </div>
-
----

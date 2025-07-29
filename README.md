@@ -9,81 +9,29 @@
 
 Population genomics pipeline for studying local adaptation in *Aedes aegypti* populations.
 
-## Quick Start on HPC
+## Quick Start
 
-### 1. Clone Repository (Interactive Session)
-
+### Local Development
 ```bash
-# Start interactive session (choose one):
-srun -p epyc --mem=16g -c 8 -t 5:00:00 --pty bash -l
-srun -p epyc --mem=16g -c 8 -t 5:00:00 --pty zsh -l   # Session with zsh
-
 # Clone repository
 git clone https://github.com/cosmelab/aedes-local-adaptation.git
 cd aedes-local-adaptation
-```
 
-### 2. Pull Container
+# Pull container (Docker)
+docker run -it ghcr.io/cosmelab/aedes-local-adaptation:latest
 
-```bash
-# Load Singularity/Apptainer
-module load singularity-ce/3.9.3  # or: module load apptainer
-
-# Set Singularity cache directory to avoid quota issues
-mkdir -p singularity_temp_cache
-export SINGULARITY_CACHEDIR=$PWD/singularity_temp_cache
-
-# Pull from GitHub Container Registry (recommended)
-singularity pull aedes-local-adaptation.sif docker://ghcr.io/cosmelab/aedes-local-adaptation:latest
-
-# Alternative: Docker Hub
-# singularity pull aedes-local-adaptation.sif docker://cosmelab/aedes-local-adaptation:latest
-
-# Check the built .sif file
-ls -lh aedes-local-adaptation.sif
-
-# Clean up cache after build
-rm -rf singularity_temp_cache
-unset SINGULARITY_CACHEDIR
-```
-
-### 3. Run Container
-
-```bash
-# Interactive shell with project mounted
-singularity shell --cleanenv --bind $PWD:/proj aedes-local-adaptation.sif
-
-# Inside container - enjoy the configured zsh environment
-cd /proj && zsh
-
-# Test all tools (logs saved to logs/ directory)
+# Test all tools
 bash scripts/test_all_tools.sh
 ```
 
-### 4. Testing Container Tools
-
-The container includes comprehensive testing scripts to verify all tools are properly installed:
-
-```bash
-# Run all tests (recommended - from project root)
-bash scripts/test_all_tools.sh
-
-# Individual tests (from scripts/test_tools/)
-bash scripts/test_tools/test_container_tools.sh  # Main bioinformatics tools
-bash scripts/test_tools/test_gdal_tools.sh       # GDAL/geospatial tools
-
-# Get help for specific tools
-bash scripts/test_tools/tool_help.sh samtools    # Quick tool help
-bash scripts/test_tools/tool_explorer.sh         # Interactive tool explorer
-```
-
-Test outputs are saved to the `logs/` directory and are automatically ignored by git.
+### HPC Usage
+For detailed HPC setup instructions, SLURM job templates, and troubleshooting, see [HPC.md](HPC.md).
 
 ## Container Information
 
-- **Size**: ~8GB
-- **Tools**: 50+ bioinformatics tools
-- **Base**: Python 3.11.7, R 4.3.2
+- **Size**: ~3.7GB
+- **Tools**: 50+ bioinformatics tools  
+- **Base**: Python 3.11.7, R 4.3.3
 - **Architecture**: AMD64/x86_64 (HPC optimized)
 
 ## Key Tools Included
@@ -100,31 +48,8 @@ Test outputs are saved to the `logs/` directory and are automatically ignored by
 
 ### Languages & Environments
 - Python 3.11.7 (numpy, pandas, scikit-allel, cyvcf2, pysam)
-- R 4.3.2 (tidyverse, adegenet, vcfR, SNPRelate)
+- R 4.3.3 (tidyverse, adegenet, vcfR, SNPRelate, lostruct)
 - Jupyter Lab, Snakemake
-
-## SLURM Job Example
-
-```bash
-#!/bin/bash
-#SBATCH --job-name=aedes-analysis
-#SBATCH --output=logs/%j.out
-#SBATCH --error=logs/%j.err
-#SBATCH --time=24:00:00
-#SBATCH --nodes=1
-#SBATCH --ntasks=1
-#SBATCH --cpus-per-task=16
-#SBATCH --mem=64G
-#SBATCH --partition=epyc
-
-module load singularity-ce/3.9.3
-
-singularity exec \
-    --cleanenv \
-    --bind $PWD:/proj \
-    aedes-local-adaptation.sif \
-    bash -c "cd /proj && python scripts/analysis/your_analysis.py"
-```
 
 ## Project Structure
 
@@ -158,7 +83,6 @@ aedes-local-adaptation/
 
 ## Additional Resources
 
-- [hpc_setup_guide.md](hpc_setup_guide.md) - Detailed HPC instructions
+- [HPC.md](HPC.md) - Complete HPC setup guide and SLURM templates
 - [TOOLS.md](TOOLS.md) - Complete tool list with exact versions
-- [readme_hpc.md](readme_hpc.md) - HPC-specific README
 - Issues: [GitHub Issues](https://github.com/cosmelab/aedes-local-adaptation/issues)
