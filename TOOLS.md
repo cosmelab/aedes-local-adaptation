@@ -154,7 +154,7 @@ unset SINGULARITY_CACHEDIR
 </tr>
 <tr>
 <td><b>🧮 bcftools</b></td>
-<td><code>Library issue</code></td>
+<td><code>1.22 (needs rebuild)</code></td>
 <td>VCF/BCF file manipulation and analysis</td>
 </tr>
 <tr>

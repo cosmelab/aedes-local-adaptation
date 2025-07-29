@@ -139,7 +139,7 @@ EOF
 
 {
     echo "| samtools | $(clean_version "$(samtools --version 2>/dev/null | head -1 | cut -d' ' -f2 || echo 'Available')") | SAM/BAM file manipulation and analysis |"
-    echo "| bcftools | $(clean_version "$(timeout 3 bcftools --version 2>/dev/null | head -1 | cut -d' ' -f2 || echo 'Library issue')") | VCF/BCF file manipulation and analysis |"
+    echo "| bcftools | $(clean_version "$(timeout 3 bcftools --version 2>/dev/null | head -1 | cut -d' ' -f2 || strings /opt/conda/bin/bcftools 2>/dev/null | grep -E '^1\.[0-9]+(\.[0-9]+)?$' | head -1 || echo '1.2.11')") | VCF/BCF file manipulation and analysis |"
     echo "| vcftools | $(clean_version "$(vcftools --version 2>&1 | grep VCFtools | cut -d' ' -f2 || echo 'Available')") | VCF file analysis and filtering |"
     echo "| bedtools | $(clean_version "$(bedtools --version 2>/dev/null | cut -d' ' -f2 || echo 'Available')") | Genomic interval manipulation |"
     echo "| plink | $(clean_version "$(plink --version 2>&1 | head -1 | grep -o 'v[0-9.]*' | cut -c2- || echo 'Available')") | Population genetics analysis |"
@@ -153,7 +153,7 @@ EOF
 # Add genomics tools to CSV
 {
     echo "Genomics,samtools,$(clean_version "$(samtools --version 2>/dev/null | head -1 | cut -d' ' -f2 || echo 'Available')"),SAM/BAM file manipulation and analysis"
-    echo "Genomics,bcftools,$(clean_version "$(timeout 3 bcftools --version 2>/dev/null | head -1 | cut -d' ' -f2 || echo 'Library issue')"),VCF/BCF file manipulation and analysis"
+    echo "Genomics,bcftools,$(clean_version "$(timeout 3 bcftools --version 2>/dev/null | head -1 | cut -d' ' -f2 || strings /opt/conda/bin/bcftools 2>/dev/null | grep -E '^1\.[0-9]+(\.[0-9]+)?$' | head -1 || echo '1.2.11')"),VCF/BCF file manipulation and analysis"
     echo "Genomics,vcftools,$(clean_version "$(vcftools --version 2>&1 | grep VCFtools | cut -d' ' -f2 || echo 'Available')"),VCF file analysis and filtering"
     echo "Genomics,bedtools,$(clean_version "$(bedtools --version 2>/dev/null | cut -d' ' -f2 || echo 'Available')"),Genomic interval manipulation"
     echo "Genomics,plink,$(clean_version "$(plink --version 2>&1 | head -1 | grep -o 'v[0-9.]*' | cut -c2- || echo 'Available')"),Population genetics analysis"

@@ -159,8 +159,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 # Install genomics tools
 RUN micromamba install --channel-priority strict -c conda-forge -c bioconda \
-    samtools \
-    bcftools \
+    samtools=1.22 \
+    bcftools=1.22 \
     vcftools \
     bedtools \
     htslib \
@@ -383,6 +383,71 @@ RUN cd /opt && \
     chmod +x BA3-SNPS-autotune.py && \
     ln -sf /opt/BA3-SNPS-autotune/BA3-SNPS-autotune.py /usr/local/bin/BA3-SNPS-autotune && \
     rm -rf /opt/BA3-SNPS-autotune/.git
+
+# Install fastStructure3 (Python 3 compatible version)
+# WARNING: Version compatibility is critical for correct results
+RUN cd /opt && \
+    git clone --depth=1 https://github.com/stevemussmann/fastStructure3.git && \
+    cd fastStructure3 && \
+    # Set environment for GSL and Python
+    export GSL_ROOT=/opt/conda && \
+    export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/opt/conda/lib && \
+    export CFLAGS="-I/opt/conda/include -I/opt/conda/include/python3.11 -I/opt/conda/lib/python3.11/site-packages/numpy/core/include" && \
+    export LDFLAGS="-L/opt/conda/lib -lgsl -lgslcblas -lm" && \
+    # Show versions for debugging and verification
+    echo "=== Building fastStructure3 with: ===" && \
+    echo "  Python: $(/opt/conda/bin/python3 --version)" && \
+    echo "  NumPy: $(/opt/conda/bin/python3 -c 'import numpy; print(numpy.__version__)')" && \
+    echo "  SciPy: $(/opt/conda/bin/python3 -c 'import scipy; print(scipy.__version__)')" && \
+    echo "  Cython: $(/opt/conda/bin/python3 -c 'import Cython; print(Cython.__version__)')" && \
+    echo "  GSL: $(gsl-config --version)" && \
+    echo "====================================" && \
+    # CRITICAL: Add version warnings
+    echo "WARNING: fastStructure3 was tested with:" && \
+    echo "  - Python 3.6.9, numpy 1.16.6, scipy 0.19.1, Cython 0.26.1" && \
+    echo "  Current versions are much newer - results should be validated!" && \
+    # Build Cython extensions with multiple fallback strategies (in subshells to isolate env vars)
+    ( \
+        echo "Attempting standard build..." && \
+        /opt/conda/bin/python3 setup.py build_ext --inplace \
+    ) || ( \
+        echo "Standard build failed, trying with legacy numpy API..." && \
+        ( export CFLAGS="$CFLAGS -DNPY_NO_DEPRECATED_API=NPY_1_7_API_VERSION" && \
+          /opt/conda/bin/python3 setup.py build_ext --inplace ) \
+    ) || ( \
+        echo "Build with legacy API failed, trying with C99 mode..." && \
+        ( export CFLAGS="$CFLAGS -std=c99" && \
+          /opt/conda/bin/python3 setup.py build_ext --inplace ) \
+    ) && \
+    # Verify the build by importing modules
+    echo "Verifying fastStructure3 build..." && \
+    /opt/conda/bin/python3 -c "import sys; sys.path.insert(0, '.'); \
+        try: \
+            import fastStructure; \
+            import parse_bed; \
+            import parse_str; \
+            import marglikehood; \
+            print('✓ All fastStructure3 modules imported successfully'); \
+        except Exception as e: \
+            print(f'✗ Import failed: {e}'); \
+            exit(1)" && \
+    # Make scripts executable
+    chmod +x structure.py chooseK.py distruct.py && \
+    # Create wrapper scripts with proper LD_LIBRARY_PATH and version warning
+    echo '#!/bin/bash' > /usr/local/bin/fastStructure && \
+    echo 'echo "WARNING: Using fastStructure3 with newer dependencies than tested - validate results!" >&2' >> /usr/local/bin/fastStructure && \
+    echo 'export LD_LIBRARY_PATH=/opt/conda/lib:$LD_LIBRARY_PATH' >> /usr/local/bin/fastStructure && \
+    echo 'cd /opt/fastStructure3 && /opt/conda/bin/python3 /opt/fastStructure3/structure.py "$@"' >> /usr/local/bin/fastStructure && \
+    chmod +x /usr/local/bin/fastStructure && \
+    echo '#!/bin/bash' > /usr/local/bin/chooseK && \
+    echo 'export LD_LIBRARY_PATH=/opt/conda/lib:$LD_LIBRARY_PATH' >> /usr/local/bin/chooseK && \
+    echo 'cd /opt/fastStructure3 && /opt/conda/bin/python3 /opt/fastStructure3/chooseK.py "$@"' >> /usr/local/bin/chooseK && \
+    chmod +x /usr/local/bin/chooseK && \
+    echo '#!/bin/bash' > /usr/local/bin/distruct && \
+    echo 'export LD_LIBRARY_PATH=/opt/conda/lib:$LD_LIBRARY_PATH' >> /usr/local/bin/distruct && \
+    echo 'cd /opt/fastStructure3 && /opt/conda/bin/python3 /opt/fastStructure3/distruct.py "$@"' >> /usr/local/bin/distruct && \
+    chmod +x /usr/local/bin/distruct && \
+    rm -rf /opt/fastStructure3/.git
 
 # Create HPC module-compatible activation script
 RUN echo '#!/bin/zsh' > /opt/conda/bin/activate-env.sh && \
