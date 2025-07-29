@@ -387,35 +387,36 @@ RUN cd /opt && \
 # Install fastStructure3 in a dedicated conda environment
 # This avoids conflicts with newer package versions in the main environment
 RUN echo "Creating dedicated environment for fastStructure3..." && \
-    micromamba create -n faststructure python=3.6.9 -c conda-forge -y && \
-    micromamba run -n faststructure pip install --no-cache-dir \
-        numpy==1.16.6 \
-        scipy==0.19.1 \
-        Cython==0.26.1 && \
-    micromamba install -n faststructure -c conda-forge gsl=2.5 -y && \
+    micromamba create -n faststructure python=3.6.9 pip -c conda-forge -y && \
+    # Install specific versions using conda to avoid pip compatibility issues
+    micromamba install -n faststructure -c conda-forge \
+        numpy=1.16.6 \
+        scipy=0.19.1 \
+        cython=0.26.1 \
+        gsl=2.5 -y && \
     # Clone and build fastStructure3
     cd /opt && \
     git clone --depth=1 https://github.com/stevemussmann/fastStructure3.git && \
     cd fastStructure3 && \
-    # Build in the dedicated environment
-    export GSL_ROOT=/opt/conda/envs/faststructure && \
-    export LD_LIBRARY_PATH=/opt/conda/envs/faststructure/lib:$LD_LIBRARY_PATH && \
-    export CFLAGS="-I/opt/conda/envs/faststructure/include" && \
-    export LDFLAGS="-L/opt/conda/envs/faststructure/lib -lgsl -lgslcblas -lm" && \
-    micromamba run -n faststructure python setup.py build_ext --inplace && \
-    # Test the build
-    micromamba run -n faststructure python -c "import sys; sys.path.insert(0, '.'); import fastStructure; print('✓ fastStructure module built successfully')" && \
+    # Build in the dedicated environment with proper paths
+    micromamba run -n faststructure bash -c " \
+        export GSL_ROOT=/opt/conda/envs/faststructure && \
+        export LD_LIBRARY_PATH=/opt/conda/envs/faststructure/lib:${LD_LIBRARY_PATH:-} && \
+        export CFLAGS='-I/opt/conda/envs/faststructure/include' && \
+        export LDFLAGS='-L/opt/conda/envs/faststructure/lib -lgsl -lgslcblas -lm' && \
+        python setup.py build_ext --inplace && \
+        python -c \"import sys; sys.path.insert(0, '.'); import fastStructure; print('✓ fastStructure module built successfully')\"" && \
     # Create wrapper scripts that activate the environment
     echo '#!/bin/bash' > /usr/local/bin/fastStructure && \
-    echo 'export LD_LIBRARY_PATH=/opt/conda/envs/faststructure/lib:$LD_LIBRARY_PATH' >> /usr/local/bin/fastStructure && \
+    echo 'export LD_LIBRARY_PATH=/opt/conda/envs/faststructure/lib:${LD_LIBRARY_PATH:-}' >> /usr/local/bin/fastStructure && \
     echo 'cd /opt/fastStructure3 && micromamba run -n faststructure python /opt/fastStructure3/structure.py "$@"' >> /usr/local/bin/fastStructure && \
     chmod +x /usr/local/bin/fastStructure && \
     echo '#!/bin/bash' > /usr/local/bin/chooseK && \
-    echo 'export LD_LIBRARY_PATH=/opt/conda/envs/faststructure/lib:$LD_LIBRARY_PATH' >> /usr/local/bin/chooseK && \
+    echo 'export LD_LIBRARY_PATH=/opt/conda/envs/faststructure/lib:${LD_LIBRARY_PATH:-}' >> /usr/local/bin/chooseK && \
     echo 'cd /opt/fastStructure3 && micromamba run -n faststructure python /opt/fastStructure3/chooseK.py "$@"' >> /usr/local/bin/chooseK && \
     chmod +x /usr/local/bin/chooseK && \
     echo '#!/bin/bash' > /usr/local/bin/distruct && \
-    echo 'export LD_LIBRARY_PATH=/opt/conda/envs/faststructure/lib:$LD_LIBRARY_PATH' >> /usr/local/bin/distruct && \
+    echo 'export LD_LIBRARY_PATH=/opt/conda/envs/faststructure/lib:${LD_LIBRARY_PATH:-}' >> /usr/local/bin/distruct && \
     echo 'cd /opt/fastStructure3 && micromamba run -n faststructure python /opt/fastStructure3/distruct.py "$@"' >> /usr/local/bin/distruct && \
     chmod +x /usr/local/bin/distruct && \
     rm -rf /opt/fastStructure3/.git && \
