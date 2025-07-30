@@ -8,6 +8,10 @@ FROM mambaorg/micromamba:1.5.0
 ARG GITHUB_PAT
 ENV GITHUB_PAT=$GITHUB_PAT
 
+# Cache control - change this value to force rebuild from this point
+ARG CACHE_DATE=2024-01-01
+ENV CACHE_BUST=${CACHE_DATE}
+
 # Document architecture requirement
 LABEL maintainer="cosmelab@domain.com" \
       architecture="amd64" \
@@ -91,7 +95,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && mkdir -p /home/aedes && chown aedes:aedes /home/aedes
 
 # Install lsd with error checking and cleanup
-RUN wget --retry-connrefused --waitretry=1 --read-timeout=20 --timeout=15 -t 3 \
+RUN echo "=== Cache Debug: Installing lsd at $(date) ===" \
+    && wget --retry-connrefused --waitretry=1 --read-timeout=20 --timeout=15 -t 3 \
     https://github.com/lsd-rs/lsd/releases/download/v1.1.5/lsd-v1.1.5-x86_64-unknown-linux-gnu.tar.gz \
     && tar -xzf lsd-v1.1.5-x86_64-unknown-linux-gnu.tar.gz \
     && mv lsd-v1.1.5-x86_64-unknown-linux-gnu/lsd /usr/local/bin/ \
@@ -386,7 +391,9 @@ RUN cd /opt && \
 
 # Install fastStructure3 in a dedicated conda environment
 # This avoids conflicts with newer package versions in the main environment
-RUN echo "Creating dedicated environment for fastStructure3..." && \
+# CACHE BUST: If fastStructure3 fails, add RUN echo "bust cache $(date)" before this line
+RUN echo "=== Cache Debug: Installing fastStructure3 at $(date) ===" && \
+    echo "Creating dedicated environment for fastStructure3..." && \
     micromamba create -n faststructure python=3.6.9 pip -c conda-forge -y && \
     # Install specific versions using conda to avoid pip compatibility issues
     micromamba install -n faststructure -c conda-forge \
@@ -444,6 +451,10 @@ RUN echo '#!/bin/zsh' > /opt/conda/bin/activate-env.sh && \
     echo 'eval "$(micromamba shell hook --shell zsh)"' >> /opt/conda/bin/activate-env.sh && \
     echo 'micromamba activate base' >> /opt/conda/bin/activate-env.sh && \
     chmod +x /opt/conda/bin/activate-env.sh
+
+# Add debug script for cache troubleshooting
+COPY scripts/debug-cache.sh /usr/local/bin/debug-cache
+RUN chmod +x /usr/local/bin/debug-cache
 
 # Switch to aedes user
 USER aedes

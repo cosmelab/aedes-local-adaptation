@@ -17,6 +17,12 @@ on:
       - '!scripts/*.md'
       - '!logs/**'
   workflow_dispatch:
+    inputs:
+      no-cache:
+        description: 'Force rebuild without cache'
+        required: false
+        type: boolean
+        default: false
 permissions:
   contents: read
   packages: write
@@ -63,4 +69,12 @@ jobs:
             ${{ steps.meta.outputs.labels }}
           build-args: |
             GITHUB_PAT=${{ secrets.GHCR_TOKEN }}
-          no-cache: true
+            CACHE_DATE=${{ github.run_id }}
+          # Use cache unless manually triggered with no-cache option
+          no-cache: ${{ github.event.inputs.no-cache == 'true' }}
+          # Enable registry caching
+          cache-from: |
+            type=registry,ref=ghcr.io/cosmelab/aedes-local-adaptation:buildcache
+            type=registry,ref=ghcr.io/cosmelab/aedes-local-adaptation:latest
+          cache-to: |
+            type=registry,ref=ghcr.io/cosmelab/aedes-local-adaptation:buildcache,mode=max
