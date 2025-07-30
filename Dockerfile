@@ -399,23 +399,32 @@ RUN echo "Creating dedicated environment for fastStructure3..." && \
     git clone --depth=1 https://github.com/stevemussmann/fastStructure3.git && \
     cd fastStructure3 && \
     # Build in the dedicated environment with proper paths
+    # Use PYTHONNOUSERSITE to prevent loading packages from outside the environment
     micromamba run -n faststructure bash -c " \
+        export PYTHONNOUSERSITE=1 && \
+        export PYTHONPATH=/opt/conda/envs/faststructure/lib/python3.6/site-packages && \
         export GSL_ROOT=/opt/conda/envs/faststructure && \
-        export LD_LIBRARY_PATH=/opt/conda/envs/faststructure/lib:${LD_LIBRARY_PATH:-} && \
+        export LD_LIBRARY_PATH=/opt/conda/envs/faststructure/lib:\$LD_LIBRARY_PATH && \
         export CFLAGS='-I/opt/conda/envs/faststructure/include' && \
         export LDFLAGS='-L/opt/conda/envs/faststructure/lib -lgsl -lgslcblas -lm' && \
         python setup.py build_ext --inplace && \
         python -c \"import sys; sys.path.insert(0, '.'); import fastStructure; print('✓ fastStructure module built successfully')\"" && \
     # Create wrapper scripts that activate the environment
     echo '#!/bin/bash' > /usr/local/bin/fastStructure && \
+    echo 'export PYTHONNOUSERSITE=1' >> /usr/local/bin/fastStructure && \
+    echo 'export PYTHONPATH=/opt/conda/envs/faststructure/lib/python3.6/site-packages' >> /usr/local/bin/fastStructure && \
     echo 'export LD_LIBRARY_PATH=/opt/conda/envs/faststructure/lib:${LD_LIBRARY_PATH:-}' >> /usr/local/bin/fastStructure && \
     echo 'cd /opt/fastStructure3 && micromamba run -n faststructure python /opt/fastStructure3/structure.py "$@"' >> /usr/local/bin/fastStructure && \
     chmod +x /usr/local/bin/fastStructure && \
     echo '#!/bin/bash' > /usr/local/bin/chooseK && \
+    echo 'export PYTHONNOUSERSITE=1' >> /usr/local/bin/chooseK && \
+    echo 'export PYTHONPATH=/opt/conda/envs/faststructure/lib/python3.6/site-packages' >> /usr/local/bin/chooseK && \
     echo 'export LD_LIBRARY_PATH=/opt/conda/envs/faststructure/lib:${LD_LIBRARY_PATH:-}' >> /usr/local/bin/chooseK && \
     echo 'cd /opt/fastStructure3 && micromamba run -n faststructure python /opt/fastStructure3/chooseK.py "$@"' >> /usr/local/bin/chooseK && \
     chmod +x /usr/local/bin/chooseK && \
     echo '#!/bin/bash' > /usr/local/bin/distruct && \
+    echo 'export PYTHONNOUSERSITE=1' >> /usr/local/bin/distruct && \
+    echo 'export PYTHONPATH=/opt/conda/envs/faststructure/lib/python3.6/site-packages' >> /usr/local/bin/distruct && \
     echo 'export LD_LIBRARY_PATH=/opt/conda/envs/faststructure/lib:${LD_LIBRARY_PATH:-}' >> /usr/local/bin/distruct && \
     echo 'cd /opt/fastStructure3 && micromamba run -n faststructure python /opt/fastStructure3/distruct.py "$@"' >> /usr/local/bin/distruct && \
     chmod +x /usr/local/bin/distruct && \
