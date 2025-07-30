@@ -401,8 +401,7 @@ RUN echo "=== Cache Debug: Installing fastStructure3 at $(date) ===" && \
         scipy=0.19.1 \
         cython=0.26.1 \
         gsl=2.5 \
-        libgfortran-ng \
-        libgfortran3 -y && \
+        libgfortran-ng -y && \
     # Clone and build fastStructure3
     cd /opt && \
     git clone --depth=1 https://github.com/stevemussmann/fastStructure3.git && \
