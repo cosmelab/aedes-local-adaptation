@@ -399,16 +399,21 @@ RUN echo "Creating dedicated environment for fastStructure3..." && \
     git clone --depth=1 https://github.com/stevemussmann/fastStructure3.git && \
     cd fastStructure3 && \
     # Build in the dedicated environment with proper paths
-    # Use PYTHONNOUSERSITE to prevent loading packages from outside the environment
+    # CRITICAL: Build vars directory extensions FIRST, then main extensions
     micromamba run -n faststructure bash -c " \
         export PYTHONNOUSERSITE=1 && \
         export PYTHONPATH=/opt/conda/envs/faststructure/lib/python3.6/site-packages && \
-        export GSL_ROOT=/opt/conda/envs/faststructure && \
-        export LD_LIBRARY_PATH=/opt/conda/envs/faststructure/lib:\$LD_LIBRARY_PATH && \
+        export LD_LIBRARY_PATH=/opt/conda/envs/faststructure/lib:\${LD_LIBRARY_PATH:-} && \
         export CFLAGS='-I/opt/conda/envs/faststructure/include' && \
         export LDFLAGS='-L/opt/conda/envs/faststructure/lib -lgsl -lgslcblas -lm' && \
+        echo '=== Building vars directory extensions first ===' && \
+        cd vars && \
         python setup.py build_ext --inplace && \
-        python -c \"import sys; sys.path.insert(0, '.'); import fastStructure; print('✓ fastStructure module built successfully')\"" && \
+        cd .. && \
+        echo '=== Building main fastStructure extensions ===' && \
+        python setup.py build_ext --inplace && \
+        echo '=== Testing import ===' && \
+        python -c 'import sys; sys.path.insert(0, \".\"); import fastStructure; print(\"✓ fastStructure module imported successfully\")'  " && \
     # Create wrapper scripts that activate the environment
     echo '#!/bin/bash' > /usr/local/bin/fastStructure && \
     echo 'export PYTHONNOUSERSITE=1' >> /usr/local/bin/fastStructure && \
