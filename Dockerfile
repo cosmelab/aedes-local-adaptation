@@ -177,6 +177,7 @@ RUN micromamba install --channel-priority strict -c conda-forge -c bioconda \
     admixture \
     iqtree \
     starship \
+    fzf \
     datamash \
     openjdk=17 \
     sra-tools \
@@ -500,13 +501,6 @@ RUN git clone --depth=1 https://github.com/romkatv/powerlevel10k.git /tmp/powerl
     # Local adaptation tools
     echo '# Local adaptation tools' >> /home/aedes/.zshrc && \
     echo 'export PATH="/opt/BayesAss3-SNPs:/opt/BA3-SNPS-autotune:/opt/sambada/binaries:$PATH"' >> /home/aedes/.zshrc && \
-    # Install fzf
-    mkdir -p ~/.fzf && \
-    git clone --depth=1 https://github.com/junegunn/fzf.git ~/.fzf && \
-    ~/.fzf/install --all && \
-    rm -rf ~/.fzf/.git && \
-    echo '[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh' >> /home/aedes/.zshrc && \
-    echo 'export FZF_BASE=~/.fzf' >> /home/aedes/.zshrc && \
     rm -rf /tmp/powerlevel10k
 
 # Create colorls configuration

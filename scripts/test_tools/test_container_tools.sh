@@ -167,7 +167,7 @@ test_tool "lsd" "lsd"
 test_tool "colorls" "colorls"
 test_tool "starship" "starship"
 test_tool "autojump" "autojump"
-test_tool_path "fzf" "fzf" "/home/aedes/.fzf/bin/fzf"
+test_tool "fzf" "fzf"
 echo ""
 
 # 3. Python Core Packages (from Dockerfile)
