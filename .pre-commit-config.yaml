@@ -1,4 +1,12 @@
+# Lab pre-commit config.
+# Baseline managed by tracking-hub/tools/sync_pre_commit_baseline.py.
+# To change baseline behavior across all repos:
+#   1. Edit ~/projects/tracking-hub/tools/pre_commit_baseline.yaml
+#   2. Run: python3 tools/sync_pre_commit_baseline.py --apply
+# Repo-specific hooks go inside the LOCAL section below; they survive re-syncs.
+
 repos:
+  # === BEGIN baseline (managed by sync_pre_commit_baseline.py) ===
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v4.5.0
     hooks:
@@ -6,6 +14,10 @@ repos:
         args: [--fix=lf]
       - id: end-of-file-fixer
       - id: trailing-whitespace
+      - id: check-merge-conflict
+      - id: check-added-large-files
+        args: ['--maxkb=1000']
+      - id: check-yaml
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: v0.15.1
@@ -13,3 +25,9 @@ repos:
       - id: ruff-check
         args: [--fix]
       - id: ruff-format
+  # === END baseline ===
+
+  # === BEGIN local (preserved across syncs) ===
+  # Add repo-specific hooks here. Anything between the LOCAL markers
+  # survives sync_pre_commit_baseline.py runs.
+  # === END local ===
