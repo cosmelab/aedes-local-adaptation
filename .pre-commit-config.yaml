@@ -18,6 +18,10 @@ repos:
       - id: check-added-large-files
         args: ['--maxkb=1000']
       - id: check-yaml
+        # Session/notes files are YAML frontmatter + free-form markdown body
+        # (lab convention) — not strictly parseable, but valid for the embedding
+        # pipeline. Excluded from strict YAML parsing.
+        exclude: '^tracking/(sessions|notes)/'
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: v0.15.1
